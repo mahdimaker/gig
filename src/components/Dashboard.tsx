@@ -320,7 +320,7 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
   };
 
   return (
-    <div className="space-y-6 pb-28 md:pb-6" id="dashboard-tab-container">
+    <div className="flex flex-col justify-start space-y-6 h-auto" id="dashboard-tab-container">
       
       {/* Toast Alert removed as per user instruction */}
 
@@ -864,7 +864,7 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
           {/* REAL NET PROFIT CARD */}
           <section 
             id="real-net-profit-card"
-            className="bg-zinc-950 border border-emerald-950/80 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-full min-h-[500px]"
+            className="bg-zinc-950 border border-emerald-950/80 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-start h-auto"
           >
             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/[0.03] rounded-full blur-3xl pointer-events-none"></div>
             
@@ -1059,7 +1059,7 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
       </AnimatePresence>
 
       {/* Global Footer Placement: bottom ad slot container at the very end of this tab view */}
-      <AdSlot presetIndex={0} className="mt-8 mb-24 md:mb-0" />
+      <AdSlot presetIndex={0} className="mt-6 sm:mt-8" />
 
       {/* Sticky/Fixed Bottom Submit Bar for Mobile */}
       <div 

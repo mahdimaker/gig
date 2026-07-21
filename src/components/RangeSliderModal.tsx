@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Plus, Minus, Check, Sliders, DollarSign, Milestone, Clock } from 'lucide-react';
+import AdSlot from './AdSlot';
 
 export type SliderModalType = 'income' | 'distance' | 'time' | null;
 
@@ -148,8 +149,17 @@ export default function RangeSliderModal({
             </button>
           </div>
 
+          {/* Compact Native Ad Placement - Directly below header, above value display */}
+          <div className="pt-3 pb-1" id="modal-native-ad-container">
+            <AdSlot 
+              presetIndex={type === 'income' ? 0 : type === 'distance' ? 1 : 2} 
+              compact={true} 
+              className="py-2 px-3 border-zinc-800/80 shadow-sm" 
+            />
+          </div>
+
           {/* Body Content based on Type */}
-          <div className="py-6 space-y-6">
+          <div className="py-4 space-y-5">
             
             {/* 1. GROSS INCOME MODE */}
             {type === 'income' && (

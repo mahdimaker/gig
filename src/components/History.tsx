@@ -18,10 +18,13 @@ import {
   Clock, 
   Milestone,
   ArrowUpDown,
-  ChevronDown
+  ChevronDown,
+  X,
+  SlidersHorizontal,
+  RotateCcw
 } from 'lucide-react';
 import { ShiftLog, PLATFORMS, VehicleProfile } from '../types';
-import { formatCurrency } from '../utils';
+import { formatCurrency, formatDuration } from '../utils';
 import { motion, AnimatePresence } from 'motion/react';
 import AdSlot from './AdSlot';
 
@@ -39,6 +42,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedPlatformFilter, setSelectedPlatformFilter] = useState<string>('All');
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState<boolean>(false);
   
   // Sorting state
   const [sortField, setSortField] = useState<SortField>('date');
@@ -52,6 +56,17 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
       setSortField(field);
       setSortOrder('desc');
     }
+  };
+
+  const hasActiveFilters = useMemo(() => {
+    return selectedPlatformFilter !== 'All' || sortField !== 'date' || sortOrder !== 'desc' || searchTerm.trim() !== '';
+  }, [selectedPlatformFilter, sortField, sortOrder, searchTerm]);
+
+  const resetFilters = () => {
+    setSearchTerm('');
+    setSelectedPlatformFilter('All');
+    setSortField('date');
+    setSortOrder('desc');
   };
 
   // Filter & Search & Sort logs
@@ -109,119 +124,168 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
   }, [processedLogs]);
 
   return (
-    <div className="space-y-6" id="history-tab-container">
+    <div className="space-y-4" id="history-tab-container">
       
-      {/* Search & Filter Header bar */}
-      <section className="bg-zinc-950 border border-zinc-900 rounded-2xl p-5 space-y-4 w-full" id="history-filters-bar">
+      {/* Search & Filter Header Bar - Compact Single Line */}
+      <section className="bg-zinc-950 border border-zinc-900 rounded-2xl p-3 sm:p-4 space-y-3 w-full" id="history-filters-bar">
         
-        {/* Row 1: Search box (Full-Width) */}
-        <div className="relative w-full">
-          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500">
-            <Search className="w-4 h-4" />
-          </span>
-          <input
-            type="text"
-            placeholder="Search shifts (e.g. airport surge, rain, Lyft...)"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 pl-10 pr-4 py-2.5 rounded-xl text-base focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
-          />
-          {searchTerm && (
-            <button 
-              onClick={() => setSearchTerm('')}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 text-sm font-semibold"
+        {/* Compact Single Header Line: Search Input + Filter Toggle Button */}
+        <div className="flex items-center gap-2 w-full">
+          {/* Search Box */}
+          <div className="relative flex-1">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none">
+              <Search className="w-4 h-4" />
+            </span>
+            <input
+              type="text"
+              placeholder="Search shifts..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-zinc-900/90 border border-zinc-800 text-zinc-200 pl-9 pr-8 py-2 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-sans"
+              id="history-search-input"
+            />
+            {searchTerm && (
+              <button 
+                type="button"
+                onClick={() => setSearchTerm('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 p-0.5 rounded-full"
+                title="Clear Search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Filter & Sort Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setIsFilterPanelOpen(prev => !prev)}
+            className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+              isFilterPanelOpen || hasActiveFilters
+                ? 'bg-emerald-950/60 border-emerald-500/60 text-emerald-400 shadow-sm'
+                : 'bg-zinc-900/80 border-zinc-800 text-zinc-300 hover:border-zinc-700'
+            }`}
+            id="toggle-filter-panel-button"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Filter & Sort</span>
+            <span className="sm:hidden">Filters</span>
+            {hasActiveFilters && (
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            )}
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isFilterPanelOpen ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
+
+        {/* Collapsible Extended Controls (Platform & Sorting) */}
+        <AnimatePresence>
+          {isFilterPanelOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden border-t border-zinc-900 pt-3 space-y-3"
+              id="history-collapsible-filter-panel"
             >
-              Clear
-            </button>
+              <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+                
+                {/* Platform selector */}
+                <div className="flex items-center gap-2 bg-zinc-900/60 border border-zinc-800 px-3 py-1.5 rounded-xl text-xs text-zinc-400">
+                  <Filter className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span className="font-semibold text-zinc-400">Platform:</span>
+                  <select
+                    value={selectedPlatformFilter}
+                    onChange={(e) => setSelectedPlatformFilter(e.target.value)}
+                    className="bg-transparent border-none text-zinc-200 focus:outline-none focus:ring-0 font-bold cursor-pointer text-xs ml-auto sm:ml-0"
+                    id="platform-filter-select"
+                  >
+                    <option value="All" className="bg-zinc-950">All Platforms</option>
+                    {PLATFORMS.map(p => (
+                      <option key={p.id} value={p.id} className="bg-zinc-950">{p.id}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Sort options */}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-zinc-500 font-bold hidden sm:inline mr-1">Sort:</span>
+                  <button
+                    type="button"
+                    onClick={() => handleSort('date')}
+                    className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 flex-1 sm:flex-initial ${
+                      sortField === 'date' 
+                        ? 'bg-emerald-950/60 border-emerald-800 text-emerald-400' 
+                        : 'bg-zinc-900/40 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                    }`}
+                  >
+                    Date {sortField === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSort('netProfit')}
+                    className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 flex-1 sm:flex-initial ${
+                      sortField === 'netProfit' 
+                        ? 'bg-emerald-950/60 border-emerald-800 text-emerald-400' 
+                        : 'bg-zinc-900/40 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                    }`}
+                  >
+                    Profit {sortField === 'netProfit' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSort('hourlyWage')}
+                    className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 flex-1 sm:flex-initial ${
+                      sortField === 'hourlyWage' 
+                        ? 'bg-emerald-950/60 border-emerald-800 text-emerald-400' 
+                        : 'bg-zinc-900/40 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                    }`}
+                  >
+                    Wage {sortField === 'hourlyWage' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  </button>
+                </div>
+
+              </div>
+
+              {/* Reset button if active */}
+              {hasActiveFilters && (
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="button"
+                    onClick={resetFilters}
+                    className="text-xs text-zinc-400 hover:text-emerald-400 flex items-center gap-1 transition-colors font-medium cursor-pointer"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    Reset all filters
+                  </button>
+                </div>
+              )}
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
 
-        {/* Row 2: Controls Row (Platform dropdown & Sort buttons) */}
-        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center w-full gap-4" id="history-controls-row">
-          
-          {/* Platform filter */}
-          <div className="flex items-center justify-between sm:justify-start gap-2 bg-zinc-900/60 border border-zinc-800 px-3.5 py-2.5 rounded-xl text-sm text-zinc-400 w-full sm:w-auto">
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-emerald-400" />
-              <span className="font-semibold text-zinc-350">Platform:</span>
+        {/* Compact Summary Strip */}
+        {processedLogs.length > 0 && (
+          <div className="flex items-center justify-between gap-2 px-3 py-2 bg-zinc-900/50 border border-zinc-800/80 rounded-xl text-xs font-mono text-zinc-300">
+            <div className="flex items-center gap-1.5">
+              <span className="text-zinc-500 font-bold">Shifts:</span>
+              <span className="font-bold text-white">{totals.count}</span>
             </div>
-            <select
-              value={selectedPlatformFilter}
-              onChange={(e) => setSelectedPlatformFilter(e.target.value)}
-              className="bg-transparent border-none text-zinc-200 focus:outline-none focus:ring-0 font-bold cursor-pointer text-right sm:text-left text-sm"
-            >
-              <option value="All" className="bg-zinc-950">All Platforms</option>
-              {PLATFORMS.map(p => (
-                <option key={p.id} value={p.id} className="bg-zinc-950">{p.id}</option>
-              ))}
-            </select>
+            <div className="flex items-center gap-1.5">
+              <span className="text-zinc-500 font-bold">Net:</span>
+              <span className="font-bold text-emerald-400">{formatCurrency(totals.profit, profile)}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-zinc-500 font-bold">Avg:</span>
+              <span className="font-bold text-zinc-200">{formatCurrency(totals.avgHourly, profile)}/hr</span>
+            </div>
           </div>
+        )}
 
-          {/* Sort Buttons */}
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <button
-              onClick={() => handleSort('date')}
-              className={`px-3 sm:px-4 py-2.5 rounded-xl border text-sm font-mono font-bold transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-initial ${
-                sortField === 'date' 
-                  ? 'bg-emerald-950/40 border-emerald-800 text-emerald-400 font-bold' 
-                  : 'bg-zinc-900/40 border-zinc-800/80 text-zinc-400 hover:border-zinc-700'
-              }`}
-            >
-              Date {sortField === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </button>
-            <button
-              onClick={() => handleSort('netProfit')}
-              className={`px-3 sm:px-4 py-2.5 rounded-xl border text-sm font-mono font-bold transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-initial ${
-                sortField === 'netProfit' 
-                  ? 'bg-emerald-950/40 border-emerald-800 text-emerald-400 font-bold' 
-                  : 'bg-zinc-900/40 border-zinc-800/80 text-zinc-400 hover:border-zinc-700'
-              }`}
-            >
-              Profit {sortField === 'netProfit' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </button>
-            <button
-              onClick={() => handleSort('hourlyWage')}
-              className={`px-3 sm:px-4 py-2.5 rounded-xl border text-sm font-mono font-bold transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-initial ${
-                sortField === 'hourlyWage' 
-                  ? 'bg-emerald-950/40 border-emerald-800 text-emerald-400 font-bold' 
-                  : 'bg-zinc-900/40 border-zinc-800/80 text-zinc-400 hover:border-zinc-700'
-              }`}
-            >
-              Wage {sortField === 'hourlyWage' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </button>
-          </div>
-
-        </div>
       </section>
 
-      {/* Shift Logs Tab Placement: Full-width ad slot directly between the Search/Filter card and the 2x2 grid summary cards */}
-      <AdSlot presetIndex={1} />
-
-      {/* Filtered Summary stats */}
-      {processedLogs.length > 0 && (
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-3.5" id="filtered-history-mini-dashboard">
-          <div className="bg-zinc-950 border border-zinc-900/80 p-4 rounded-xl font-mono">
-            <span className="text-xs text-zinc-400 uppercase tracking-wider block font-bold">Filtered Shifts</span>
-            <span className="text-2xl font-black text-zinc-100 mt-1 block">{totals.count} entries</span>
-          </div>
-          <div className="bg-zinc-950 border border-zinc-900/80 p-4 rounded-xl font-mono">
-            <span className="text-xs text-zinc-400 uppercase tracking-wider block font-bold">Filtered Gross</span>
-            <span className="text-2xl font-black text-zinc-100 mt-1 block">{formatCurrency(totals.gross, profile)}</span>
-          </div>
-          <div className="bg-zinc-950 border border-emerald-950 p-4 rounded-xl font-mono relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/[0.02] rounded-full blur-xl"></div>
-            <span className="text-xs text-emerald-500 uppercase tracking-wider block font-black">Filtered Net Profit</span>
-            <span className="text-2xl font-black text-emerald-400 mt-1 block">{formatCurrency(totals.profit, profile)}</span>
-          </div>
-          <div className="bg-zinc-950 border border-zinc-900/80 p-4 rounded-xl font-mono">
-            <span className="text-xs text-zinc-400 uppercase tracking-wider block font-bold">Avg Net Wage</span>
-            <span className="text-2xl font-black text-zinc-100 mt-1 block">{formatCurrency(totals.avgHourly, profile)}/hr</span>
-          </div>
-        </section>
-      )}
-
       {/* Shifts List */}
-      <div className="space-y-4" id="shifts-history-list">
+      <div className="space-y-3" id="shifts-history-list">
         <AnimatePresence mode="popLayout">
           {processedLogs.length === 0 ? (
             <motion.div
@@ -240,26 +304,28 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
               </p>
             </motion.div>
           ) : (
-            processedLogs.map((log) => {
+            processedLogs.map((log, index) => {
               const isExpanded = expandedLogId === log.id;
               const totalExpenses = log.fuelCost + log.depreciationCost + log.loggedExpenses;
               const platformConfig = PLATFORMS.find(p => p.id === log.platform) || PLATFORMS[6];
+              const showInFeedAd = (index === 0) || (index > 0 && (index + 1) % 5 === 0);
+              const adPreset = (Math.floor(index / 2) + 1) % 4;
               
               return (
-                <motion.div
-                  layout
-                  key={log.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.98 }}
-                  transition={{ duration: 0.2 }}
-                  className={`bg-zinc-950 border rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer ${
-                    isExpanded 
-                      ? 'border-emerald-500/40 ring-1 ring-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.03)] bg-zinc-900/10' 
-                      : 'border-zinc-900 hover:border-emerald-500/30 hover:bg-zinc-900/10 hover:shadow-[0_0_15px_rgba(16,185,129,0.02)]'
-                  }`}
-                  id={`shift-item-${log.id}`}
-                >
+                <React.Fragment key={log.id}>
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
+                    className={`bg-zinc-950 border rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer ${
+                      isExpanded 
+                        ? 'border-emerald-500/40 ring-1 ring-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.03)] bg-zinc-900/10' 
+                        : 'border-zinc-900 hover:border-emerald-500/30 hover:bg-zinc-900/10 hover:shadow-[0_0_15px_rgba(16,185,129,0.02)]'
+                    }`}
+                    id={`shift-item-${log.id}`}
+                  >
                   
                   {/* Item Main Bar (Collapsed Header) */}
                   <div 
@@ -311,7 +377,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
 
                       <div className="text-right">
                         <span className="text-xs text-zinc-400 uppercase tracking-wider block font-sans font-bold">Duration</span>
-                        <span className="font-bold text-zinc-200">{log.hoursOnline} hrs</span>
+                        <span className="font-bold text-zinc-200">{formatDuration(log.hoursOnline)}</span>
                       </div>
 
                       <div className="text-right">
@@ -365,7 +431,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                                   <div className="flex justify-between text-sm">
                                     <span className="text-zinc-400 flex items-center gap-1.5 font-medium">
                                       <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                                      Fuel cost for shift distance ({log.distance} {distanceUnit})
+                                      Fuel cost for shift distance ({Number(log.distance).toFixed(1)} {distanceUnit})
                                     </span>
                                     <span className="text-amber-400 font-bold">-{formatCurrency(log.fuelCost, profile)}</span>
                                   </div>
@@ -485,7 +551,23 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                     )}
                   </AnimatePresence>
 
-                </motion.div>
+                  </motion.div>
+
+                  {/* In-Feed Native Ad Placement (inserted after 1st shift and periodically) */}
+                  {showInFeedAd && (
+                    <motion.div
+                      layout
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="py-0.5"
+                      id={`in-feed-ad-item-${log.id}`}
+                    >
+                      <AdSlot presetIndex={adPreset} compact={true} />
+                    </motion.div>
+                  )}
+                </React.Fragment>
               );
             })
           )}

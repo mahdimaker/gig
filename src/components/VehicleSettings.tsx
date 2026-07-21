@@ -21,24 +21,36 @@ import {
   SquareParking,
   X,
   ShieldAlert,
-  DollarSign
+  DollarSign,
+  Download,
+  Upload,
+  FileSpreadsheet,
+  AlertTriangle
 } from 'lucide-react';
-import { VehicleProfile, DistanceUnit, FuelUnit, CustomQuickButton } from '../types';
+import { VehicleProfile, DistanceUnit, FuelUnit, CustomQuickButton, ShiftLog } from '../types';
 import { formatCurrency } from '../utils';
 import AdSlot from './AdSlot';
 
 interface VehicleSettingsProps {
   profile: VehicleProfile;
+  logs?: ShiftLog[];
+  isFirstTimeUser?: boolean;
   onUpdateProfile: (newProfile: VehicleProfile) => void;
   onClearAllLogs: () => void;
   onLoadSampleLogs: () => void;
+  onRestoreData?: (logs: ShiftLog[], newProfile?: VehicleProfile) => void;
+  onCalibrationComplete?: () => void;
 }
 
 export default function VehicleSettings({ 
   profile, 
+  logs = [],
+  isFirstTimeUser = false,
   onUpdateProfile, 
   onClearAllLogs, 
-  onLoadSampleLogs 
+  onLoadSampleLogs,
+  onRestoreData,
+  onCalibrationComplete
 }: VehicleSettingsProps) {
   // Form states initialized with current profile
   const [make, setMake] = useState(profile.make);
@@ -66,6 +78,255 @@ export default function VehicleSettings({
   const [customAmount, setCustomAmount] = useState('');
   const [customCategory, setCustomCategory] = useState<'Tolls' | 'Car Wash' | 'Parking' | 'Fines' | 'Other'>('Other');
   const [expenseSaveSuccess, setExpenseSaveSuccess] = useState(false);
+
+  // Backup & Restore states
+  const [pendingImport, setPendingImport] = useState<{
+    logs: ShiftLog[];
+    profile?: VehicleProfile;
+    fileName: string;
+    logCount: number;
+  } | null>(null);
+
+  const [importSuccess, setImportSuccess] = useState<string | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+
+  // Backup Export function (CSV)
+  const exportDataCSV = () => {
+    const currentLogs = logs || [];
+    
+    // Embed calibration settings as header metadata comment
+    const profileComment = `# CALIBRATION: ${JSON.stringify(profile)}`;
+    
+    const headers = [
+      'ID',
+      'Date',
+      'Platform',
+      'Gross Revenue',
+      'Hours Online',
+      'Distance',
+      'Fuel Cost',
+      'Depreciation Cost',
+      'Logged Expenses',
+      'Net Profit',
+      'Hourly Wage',
+      'Notes'
+    ];
+
+    const escapeCSV = (val: any) => {
+      if (val === undefined || val === null) return '""';
+      const str = String(val);
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+
+    const formatNum = (val: any) => {
+      const num = typeof val === 'number' && !isNaN(val) ? val : parseFloat(val);
+      return isNaN(num) ? '0.00' : num.toFixed(2);
+    };
+
+    const rows = currentLogs.map(log => [
+      escapeCSV(log.id),
+      escapeCSV(log.date),
+      escapeCSV(log.platform),
+      formatNum(log.grossRevenue),
+      formatNum(log.hoursOnline),
+      formatNum(log.distance),
+      formatNum(log.fuelCost),
+      formatNum(log.depreciationCost),
+      formatNum(log.loggedExpenses),
+      formatNum(log.netProfit),
+      formatNum(log.hourlyWage),
+      escapeCSV(log.notes)
+    ]);
+
+    const csvContent = [profileComment, headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const dateStr = new Date().toISOString().split('T')[0];
+    link.download = `gigdriver_backup_${dateStr}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Restore Import Handler (CSV)
+  const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImportError(null);
+    setImportSuccess(null);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const content = event.target?.result as string;
+        if (!content) return;
+
+        // Extract metadata & split CSV lines
+        const rawLines = content.split(/\r?\n/);
+        let importedProfile: VehicleProfile | undefined = undefined;
+        const csvLines: string[] = [];
+
+        for (const line of rawLines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+          if (trimmed.startsWith('# CALIBRATION:') || trimmed.startsWith('# PROFILE:')) {
+            try {
+              const jsonStr = trimmed.substring(trimmed.indexOf(':') + 1).trim();
+              importedProfile = JSON.parse(jsonStr);
+            } catch (pErr) {
+              console.warn('Failed to parse embedded profile calibration metadata from CSV:', pErr);
+            }
+          } else if (!trimmed.startsWith('#')) {
+            csvLines.push(line);
+          }
+        }
+
+        // Fallback check if user uploaded a raw JSON backup
+        if (csvLines.length === 0 && (content.trim().startsWith('{') || content.trim().startsWith('['))) {
+          const parsed = JSON.parse(content);
+          let importedLogs: ShiftLog[] = [];
+          if (Array.isArray(parsed)) {
+            importedLogs = parsed;
+          } else if (parsed && typeof parsed === 'object') {
+            if (Array.isArray(parsed.logs)) importedLogs = parsed.logs;
+            if (parsed.profile) importedProfile = parsed.profile;
+          }
+          if (importedLogs.length > 0 || importedProfile) {
+            setPendingImport({
+              logs: importedLogs,
+              profile: importedProfile,
+              fileName: file.name,
+              logCount: importedLogs.length
+            });
+            return;
+          }
+        }
+
+        if (csvLines.length < 2) {
+          setImportError('CSV backup must contain a header row and at least one data row.');
+          return;
+        }
+
+        const headerLine = csvLines[0];
+        const headers = headerLine.split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+        const dateIdx = headers.findIndex(h => /date/i.test(h));
+        const platformIdx = headers.findIndex(h => /platform/i.test(h));
+        const grossIdx = headers.findIndex(h => /gross/i.test(h));
+        const hoursIdx = headers.findIndex(h => /hours/i.test(h));
+        const distanceIdx = headers.findIndex(h => /distance|miles|km/i.test(h));
+        const fuelIdx = headers.findIndex(h => /fuel/i.test(h));
+        const depIdx = headers.findIndex(h => /depreciation|wear/i.test(h));
+        const expIdx = headers.findIndex(h => /expenses/i.test(h));
+        const netIdx = headers.findIndex(h => /net/i.test(h));
+        const notesIdx = headers.findIndex(h => /notes/i.test(h));
+        const idIdx = headers.findIndex(h => /id/i.test(h));
+
+        const importedLogs: ShiftLog[] = [];
+
+        // Helper to parse CSV row respecting quotes
+        const parseCSVLine = (textLine: string) => {
+          const result: string[] = [];
+          let cur = '';
+          let inQuotes = false;
+          for (let i = 0; i < textLine.length; i++) {
+            const char = textLine[i];
+            if (char === '"') {
+              if (inQuotes && textLine[i + 1] === '"') {
+                cur += '"';
+                i++;
+              } else {
+                inQuotes = !inQuotes;
+              }
+            } else if (char === ',' && !inQuotes) {
+              result.push(cur.trim());
+              cur = '';
+            } else {
+              cur += char;
+            }
+          }
+          result.push(cur.trim());
+          return result.map(v => v.replace(/^"|"$/g, ''));
+        };
+
+        for (let i = 1; i < csvLines.length; i++) {
+          const cleanRow = parseCSVLine(csvLines[i]);
+          if (cleanRow.length < 2) continue;
+
+          const date = dateIdx >= 0 && cleanRow[dateIdx] ? cleanRow[dateIdx] : new Date().toISOString().split('T')[0];
+          const platformRaw = platformIdx >= 0 ? cleanRow[platformIdx] : 'Other';
+          const validPlatforms = ['Uber', 'Lyft', 'DoorDash', 'Instacart', 'UberEats', 'AmazonFlex', 'Other'];
+          const platform = validPlatforms.includes(platformRaw) ? platformRaw : 'Other';
+
+          const grossRevenue = grossIdx >= 0 ? parseFloat(cleanRow[grossIdx]) || 0 : 0;
+          const hoursOnline = hoursIdx >= 0 ? parseFloat(cleanRow[hoursIdx]) || 0 : 0;
+          const distance = distanceIdx >= 0 ? parseFloat(cleanRow[distanceIdx]) || 0 : 0;
+          const fuelCost = fuelIdx >= 0 ? parseFloat(cleanRow[fuelIdx]) || 0 : 0;
+          const depreciationCost = depIdx >= 0 ? parseFloat(cleanRow[depIdx]) || 0 : 0;
+          const loggedExpenses = expIdx >= 0 ? parseFloat(cleanRow[expIdx]) || 0 : 0;
+          const netProfit = netIdx >= 0 && cleanRow[netIdx] !== '' ? parseFloat(cleanRow[netIdx]) || 0 : grossRevenue - (fuelCost + depreciationCost + loggedExpenses);
+          const hourlyWage = hoursOnline > 0 ? netProfit / hoursOnline : 0;
+          const notes = notesIdx >= 0 ? cleanRow[notesIdx] : '';
+          const logId = idIdx >= 0 && cleanRow[idIdx] ? cleanRow[idIdx] : `imported-${Date.now()}-${i}`;
+
+          importedLogs.push({
+            id: logId,
+            date,
+            platform: platform as any,
+            grossRevenue,
+            hoursOnline,
+            distance,
+            fuelCost,
+            depreciationCost,
+            loggedExpenses,
+            expensesList: [],
+            netProfit,
+            hourlyWage,
+            notes
+          });
+        }
+
+        if (importedLogs.length === 0 && !importedProfile) {
+          setImportError('Could not parse any shift logs from the uploaded CSV backup.');
+          return;
+        }
+
+        setPendingImport({
+          logs: importedLogs,
+          profile: importedProfile,
+          fileName: file.name,
+          logCount: importedLogs.length
+        });
+      } catch (err) {
+        console.error('File import error:', err);
+        setImportError('Failed to parse CSV backup file. Please ensure it is a valid CSV file.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const confirmRestore = () => {
+    if (!pendingImport) return;
+
+    if (onRestoreData) {
+      onRestoreData(pendingImport.logs, pendingImport.profile);
+    }
+    if (pendingImport.profile && onUpdateProfile) {
+      onUpdateProfile(pendingImport.profile);
+    }
+
+    setImportSuccess(`Successfully restored ${pendingImport.logCount} shift log(s)${pendingImport.profile ? ' & calibration settings' : ''}.`);
+    setPendingImport(null);
+    setImportError(null);
+
+    setTimeout(() => {
+      setImportSuccess(null);
+    }, 6000);
+  };
 
   // Sync state if profile is updated from outside (e.g. loaded sample logs or initialized)
   React.useEffect(() => {
@@ -141,7 +402,11 @@ export default function VehicleSettings({
 
     onUpdateProfile(parsedProfile);
     setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
+    if (onCalibrationComplete) {
+      onCalibrationComplete();
+    } else {
+      setTimeout(() => setSaveSuccess(false), 3000);
+    }
   };
 
   const handleSaveExpenseDefaults = (e: React.FormEvent) => {
@@ -234,6 +499,32 @@ export default function VehicleSettings({
   return (
     <div className="space-y-6" id="settings-tab-container">
       
+      {/* First-Time User Onboarding Welcome Banner */}
+      {isFirstTimeUser && (
+        <div className="bg-gradient-to-r from-emerald-950/90 via-zinc-950 to-emerald-950/90 border-2 border-emerald-500/60 rounded-2xl p-5 sm:p-6 shadow-xl shadow-emerald-950/40 relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300" id="onboarding-welcome-banner">
+          <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex items-start gap-3.5 sm:gap-4 relative z-10">
+            <div className="p-3 bg-emerald-500/20 border border-emerald-500/40 rounded-xl text-emerald-400 shrink-0 mt-0.5 shadow-sm">
+              <Sparkles className="w-6 h-6 animate-pulse" />
+            </div>
+            <div className="space-y-1.5 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="bg-emerald-500 text-black text-[10px] uppercase font-mono font-black px-2 py-0.5 rounded-md tracking-wider shadow-sm">
+                  First-Time Setup
+                </span>
+                <span className="text-xs text-emerald-400 font-bold">Initial Calibration</span>
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold text-white font-display">
+                Welcome to Gig Driver!
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-300 font-medium leading-relaxed">
+                Welcome! Set up your vehicle metrics first to enable accurate earnings tracking.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Left Section: Vehicle Settings Form (2 Cols) */}
@@ -554,10 +845,10 @@ export default function VehicleSettings({
                 
                 <button
                   type="submit"
-                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-black text-base sm:text-lg font-bold py-3.5 px-6 rounded-xl transition-all shadow-lg hover:shadow-emerald-950/20 active:scale-[0.98] cursor-pointer text-center"
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-black text-base sm:text-lg font-bold py-3.5 px-6 rounded-xl transition-all shadow-lg hover:shadow-emerald-950/20 active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-2"
                   id="save-vehicle-settings-button"
                 >
-                  Save Active Configurations
+                  <span>{isFirstTimeUser ? 'Save & Continue to Dashboard' : 'Save Active Configurations'}</span>
                 </button>
               </div>
 
@@ -802,6 +1093,70 @@ export default function VehicleSettings({
 
         {/* Right Section: System Maintenance / Reset Controls (1 Col) */}
         <div className="lg:col-span-1 space-y-6">
+          
+          {/* Data Backup & Restore Panel */}
+          <section className="bg-zinc-950 border border-zinc-900 rounded-2xl p-5 space-y-4" id="data-backup-restore-panel">
+            <div>
+              <h3 className="font-display font-bold text-sm sm:text-base text-zinc-200 uppercase tracking-wider flex items-center gap-2">
+                <Database className="w-4 h-4 text-emerald-400" /> Data Backup & Restore
+              </h3>
+              <p className="text-xs sm:text-sm text-zinc-400 mt-1 font-medium">
+                Save your logs and vehicle calibrations or restore from a backup file.
+              </p>
+            </div>
+
+            {importSuccess && (
+              <div className="p-3 bg-emerald-950/40 border border-emerald-800/60 rounded-xl text-xs text-emerald-300 font-medium flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <span>{importSuccess}</span>
+              </div>
+            )}
+
+            {importError && (
+              <div className="p-3 bg-rose-950/40 border border-rose-800/60 rounded-xl text-xs text-rose-300 font-medium flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                <span>{importError}</span>
+              </div>
+            )}
+
+            <div className="space-y-3 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {/* Export Action */}
+                <button
+                  type="button"
+                  onClick={exportDataCSV}
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500/50 py-3 px-3.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-md shadow-emerald-950/30"
+                  id="export-backup-csv-button"
+                >
+                  <Download className="w-4 h-4 text-emerald-100" />
+                  <span>Export Backup (CSV)</span>
+                </button>
+
+                {/* Import Action */}
+                <div>
+                  <label
+                    htmlFor="backup-file-upload"
+                    className="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/50 hover:border-amber-500/80 py-3 px-3.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] text-center shadow-sm"
+                    id="import-backup-csv-button"
+                  >
+                    <Upload className="w-4 h-4 text-amber-400" />
+                    <span>Import Backup (CSV)</span>
+                  </label>
+                  <input
+                    type="file"
+                    id="backup-file-upload"
+                    accept=".csv,.json"
+                    onChange={handleFileImport}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+              <p className="text-[11px] text-zinc-500 font-medium leading-tight">
+                Exports or restores shift logs and vehicle calibration settings as a clean CSV file.
+              </p>
+            </div>
+          </section>
+
           <section className="bg-zinc-950 border border-zinc-900 rounded-2xl p-5 space-y-5" id="maintenance-settings-panel">
             <div>
               <h3 className="font-display font-bold text-sm sm:text-base text-zinc-200 uppercase tracking-wider">
@@ -913,6 +1268,70 @@ export default function VehicleSettings({
 
       {/* Global Footer Placement: bottom ad slot container at the very end of this tab view */}
       <AdSlot presetIndex={3} className="mt-8" />
+
+      {/* Confirmation Prompt Modal for Data Restore */}
+      {pendingImport && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-zinc-100">Restore Data Backup?</h3>
+                  <p className="text-xs text-zinc-400">Confirmation required before overwrite</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPendingImport(null)}
+                className="text-zinc-500 hover:text-zinc-300 p-1 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-4 space-y-3 text-xs text-zinc-300">
+              <p className="font-medium leading-relaxed">
+                You are about to restore data from <span className="font-mono font-bold text-amber-400">{pendingImport.fileName}</span>.
+              </p>
+              <p className="text-rose-400 font-semibold flex items-center gap-1.5">
+                <ShieldAlert className="w-4 h-4 flex-shrink-0" />
+                Warning: This will overwrite existing shift logs and calibration settings in localStorage!
+              </p>
+              <div className="pt-2 border-t border-zinc-800/60 space-y-1 font-mono text-[11px]">
+                <div className="flex justify-between">
+                  <span className="text-zinc-500">Shift Logs to Restore:</span>
+                  <span className="text-emerald-400 font-bold">{pendingImport.logCount} records</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-500">Calibration Profile Settings:</span>
+                  <span className="text-emerald-400 font-bold">{pendingImport.profile ? 'Included' : 'Keep Current'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => setPendingImport(null)}
+                className="flex-1 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmRestore}
+                className="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl text-xs font-bold transition-all shadow-lg shadow-amber-950/20 active:scale-[0.98] cursor-pointer"
+                id="confirm-restore-button"
+              >
+                Confirm & Overwrite
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -91,9 +91,26 @@ export function computeShiftMetrics(
 }
 
 /**
+ * Formats duration given in hours into a clean human-readable string (e.g., "23 mins", "1h 15m", "8h 30m").
+ * Prevents micro-decimal floating point leaks like "0.38333333333333336 hrs".
+ */
+export function formatDuration(hours: number): string {
+  if (isNaN(hours) || hours <= 0) return '0 mins';
+  const totalMins = Math.round(hours * 60);
+  if (totalMins < 60) {
+    return `${totalMins} ${totalMins === 1 ? 'min' : 'mins'}`;
+  }
+  const h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
+  if (m === 0) return `${h} ${h === 1 ? 'hr' : 'hrs'}`;
+  return `${h}h ${m}m`;
+}
+
+/**
  * Formats value as currency
  */
 export function formatCurrency(value: number, profile?: VehicleProfile): string {
+  const safeValue = isNaN(value) || value === null || value === undefined ? 0 : value;
   const system = profile?.measurementSystem || 'us';
   let currency = 'USD';
   let locale = 'en-US';
@@ -111,7 +128,7 @@ export function formatCurrency(value: number, profile?: VehicleProfile): string 
     currency: currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(value);
+  }).format(safeValue);
 }
 
 /**

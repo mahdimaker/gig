@@ -29,6 +29,7 @@ import { motion, AnimatePresence } from 'motion/react';
 const STORAGE_KEYS = {
   PROFILE: 'cartools_vehicle_profile_v1',
   LOGS: 'cartools_shift_logs_v1',
+  CALIBRATED: 'cartools_has_calibrated_v1',
 };
 
 type AppTab = 'dashboard' | 'history' | 'stats' | 'settings';
@@ -83,8 +84,42 @@ export default function App() {
     return [];
   });
 
-  const [activeTab, setActiveTab] = useState<AppTab>('dashboard');
+  const [hasCalibrated, setHasCalibrated] = useState<boolean>(() => {
+    try {
+      const storedCal = localStorage.getItem(STORAGE_KEYS.CALIBRATED);
+      if (storedCal === 'true') return true;
+      const storedProfile = localStorage.getItem(STORAGE_KEYS.PROFILE);
+      if (storedProfile) return true;
+    } catch (e) {
+      console.warn('LocalStorage calibration state access check failed:', e);
+    }
+    return false;
+  });
+
+  const [activeTab, setActiveTab] = useState<AppTab>(() => {
+    try {
+      const storedCal = localStorage.getItem(STORAGE_KEYS.CALIBRATED);
+      const storedProfile = localStorage.getItem(STORAGE_KEYS.PROFILE);
+      if (storedCal === 'true' || storedProfile) {
+        return 'dashboard';
+      }
+    } catch (e) {
+      console.warn('LocalStorage tab state access check failed:', e);
+    }
+    return 'settings';
+  });
+
   const [dashboardResetKey, setDashboardResetKey] = useState(0);
+
+  const handleCalibrationComplete = () => {
+    setHasCalibrated(true);
+    try {
+      localStorage.setItem(STORAGE_KEYS.CALIBRATED, 'true');
+    } catch (e) {
+      console.warn('LocalStorage calibration save failed:', e);
+    }
+    setActiveTab('dashboard');
+  };
 
   // Persistence triggers safely guarded against iframe sandbox storage errors
   useEffect(() => {
@@ -119,6 +154,7 @@ export default function App() {
     const resetProfile = getInitialVehicleProfile();
     setLogs([]);
     setProfile(resetProfile);
+    setHasCalibrated(false);
     setDashboardResetKey(prev => prev + 1);
 
     // 2. Safely perform localStorage operations in try...catch
@@ -127,6 +163,7 @@ export default function App() {
       localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(resetProfile));
       localStorage.removeItem(STORAGE_KEYS.LOGS);
       localStorage.removeItem(STORAGE_KEYS.PROFILE);
+      localStorage.removeItem(STORAGE_KEYS.CALIBRATED);
     } catch (e) {
       console.warn('LocalStorage clear bypassed due to iframe restriction:', e);
     }
@@ -141,6 +178,20 @@ export default function App() {
       const filteredSamples = samples.filter(s => !existingIds.has(s.id));
       return [...filteredSamples, ...prev];
     });
+    handleCalibrationComplete();
+  };
+
+  // Restore imported logs and profile
+  const handleRestoreData = (newLogs: ShiftLog[], newProfile?: VehicleProfile) => {
+    if (newLogs) setLogs(newLogs);
+    if (newProfile) setProfile(newProfile);
+    handleCalibrationComplete();
+    try {
+      if (newLogs) localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(newLogs));
+      if (newProfile) localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(newProfile));
+    } catch (e) {
+      console.warn('LocalStorage restore write failed:', e);
+    }
   };
 
   return (
@@ -162,7 +213,7 @@ export default function App() {
       </header>
 
       {/* Main Content Layout container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-2 sm:pb-6">
         
         {/* Navigation Tabs (Big, tactical, high-contrast, finger-friendly) */}
         <nav className="grid grid-cols-4 gap-2 mb-8 bg-zinc-950 border border-zinc-900 p-1.5 rounded-2xl" id="navigation-bar">
@@ -267,9 +318,13 @@ export default function App() {
               {activeTab === 'settings' && (
                 <VehicleSettings 
                   profile={profile} 
+                  logs={logs}
+                  isFirstTimeUser={!hasCalibrated}
                   onUpdateProfile={setProfile}
                   onClearAllLogs={handleClearAllLogs}
                   onLoadSampleLogs={handleLoadSampleLogs}
+                  onRestoreData={handleRestoreData}
+                  onCalibrationComplete={handleCalibrationComplete}
                 />
               )}
             </motion.div>
@@ -279,7 +334,7 @@ export default function App() {
       </main>
 
       {/* Driver Centric Footer */}
-      <footer className="bg-zinc-950/40 border-t border-zinc-900 mt-12 py-8 text-center text-xs text-zinc-500 font-sans">
+      <footer className="bg-zinc-950/40 border-t border-zinc-900 mt-6 sm:mt-12 py-6 sm:py-8 text-center text-xs text-zinc-500 font-sans pb-24 md:pb-8">
         <div className="max-w-7xl mx-auto px-4 space-y-3">
           <p className="leading-relaxed max-w-lg mx-auto">
             CarTools respects driver confidentiality. Your vehicle stats, driving logs, and financial models remain completely private and stored locally on this physical device. No telemetry data is sent over the network.
