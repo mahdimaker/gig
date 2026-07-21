@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Redefine zinc palette to a gorgeous Dim Slate scheme */
+  --color-zinc-50: #f8fafc;
+  --color-zinc-100: #eef2f6;
+  --color-zinc-200: #cbd5e1;
+  --color-zinc-300: #acbaca;
+  --color-zinc-400: #8b9cb0;
+  --color-zinc-500: #6c7f96;
+  --color-zinc-600: #4d5c70;
+  --color-zinc-700: #39485e;
+  --color-zinc-800: #283344;
+  --color-zinc-900: #151c27;
+  --color-zinc-950: #1e2633;
+}
+
+/* Base custom styles to ensure Dim Slate appearance */
+html, body {
+  background-color: #131a26;
+  color: #f1f5f9;
+  font-family: var(--font-sans);
+}
+
+/* Custom scrollbar for slate theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #131a26;
+}
+::-webkit-scrollbar-thumb {
+  background: #283344;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #39485e;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-none {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Dynamic pulse and glow styles for the Tech Emerald theme */
+.glow-emerald {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+.glow-emerald-strong {
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+}
