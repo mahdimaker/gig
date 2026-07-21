@@ -127,9 +127,7 @@ export const getInitialVehicleProfile = (): VehicleProfile => ({
   distanceUnit: 'miles',
   fuelUnit: 'gallons',
   measurementSystem: 'us',
-  fuelPriceHistory: [
-    { date: new Date().toISOString(), price: 3.85 }
-  ],
+  fuelPriceHistory: [],
   expenseDefaults: {
     tolls: 5.00,
     carWash: 14.00,

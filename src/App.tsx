@@ -57,9 +57,7 @@ export default function App() {
       try {
         const parsed = JSON.parse(stored);
         if (!parsed.fuelPriceHistory) {
-          parsed.fuelPriceHistory = [
-            { date: new Date().toISOString(), price: parsed.fuelPrice || 3.85 }
-          ];
+          parsed.fuelPriceHistory = [];
         }
         return parsed;
       } catch (e) {
@@ -73,17 +71,20 @@ export default function App() {
     const stored = localStorage.getItem(STORAGE_KEYS.LOGS);
     if (stored) {
       try {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          // Clear any pre-populated dummy shift logs or past metrics from existing storage
+          return parsed.filter((log: any) => log && log.id && !log.id.startsWith('log-'));
+        }
       } catch (e) {
-        // Fallback to seeding
+        // Fallback
       }
     }
-    // Seed sample shifts on first load to present a rich, interactive visual dashboard
-    const defaultProfile = getInitialVehicleProfile();
-    return getSampleShiftLogs(defaultProfile);
+    return [];
   });
 
   const [activeTab, setActiveTab] = useState<AppTab>('dashboard');
+  const [dashboardResetKey, setDashboardResetKey] = useState(0);
 
   // Persistence triggers
   useEffect(() => {
@@ -106,7 +107,14 @@ export default function App() {
 
   // Reset data wipes
   const handleClearAllLogs = () => {
+    localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify([]));
     setLogs([]);
+    
+    const resetProfile = getInitialVehicleProfile();
+    setProfile(resetProfile);
+    localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(resetProfile));
+    
+    setDashboardResetKey(prev => prev + 1);
   };
 
   // Seeding logs manually
@@ -146,7 +154,7 @@ export default function App() {
           
           <button
             onClick={() => setActiveTab('dashboard')}
-            className={`py-3 rounded-xl font-medium text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-2 transition-all duration-200 ${
+            className={`py-3 rounded-xl font-semibold text-sm sm:text-base flex flex-col sm:flex-row items-center justify-center gap-2 transition-all duration-200 ${
               activeTab === 'dashboard'
                 ? 'bg-zinc-900 border border-zinc-800 text-emerald-400 font-bold shadow'
                 : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/40'
@@ -159,7 +167,7 @@ export default function App() {
 
           <button
             onClick={() => setActiveTab('history')}
-            className={`py-3 rounded-xl font-medium text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-2 transition-all duration-200 ${
+            className={`py-3 rounded-xl font-semibold text-sm sm:text-base flex flex-col sm:flex-row items-center justify-center gap-2 transition-all duration-200 ${
               activeTab === 'history'
                 ? 'bg-zinc-900 border border-zinc-800 text-emerald-400 font-bold shadow'
                 : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/40'
@@ -169,7 +177,7 @@ export default function App() {
             <HistoryIcon className="w-4 h-4" />
             <span>Shift Logs</span>
             {logs.length > 0 && (
-              <span className="hidden sm:inline-block text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded-full font-mono">
+              <span className="hidden sm:inline-block text-xs bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded-full font-mono">
                 {logs.length}
               </span>
             )}
@@ -177,7 +185,7 @@ export default function App() {
 
           <button
             onClick={() => setActiveTab('stats')}
-            className={`py-3 rounded-xl font-medium text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-2 transition-all duration-200 ${
+            className={`py-3 rounded-xl font-semibold text-sm sm:text-base flex flex-col sm:flex-row items-center justify-center gap-2 transition-all duration-200 ${
               activeTab === 'stats'
                 ? 'bg-zinc-900 border border-zinc-800 text-emerald-400 font-bold shadow'
                 : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/40'
@@ -190,7 +198,7 @@ export default function App() {
 
           <button
             onClick={() => setActiveTab('settings')}
-            className={`py-3 rounded-xl font-medium text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-2 transition-all duration-200 ${
+            className={`py-3 rounded-xl font-semibold text-sm sm:text-base flex flex-col sm:flex-row items-center justify-center gap-2 transition-all duration-200 ${
               activeTab === 'settings'
                 ? 'bg-zinc-900 border border-zinc-800 text-emerald-400 font-bold shadow'
                 : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/40'
@@ -214,12 +222,14 @@ export default function App() {
               transition={{ duration: 0.18 }}
             >
               {activeTab === 'dashboard' && (
-                <Dashboard 
-                  profile={profile} 
-                  onLogShift={handleLogShift}
-                  onNavigateToSettings={() => setActiveTab('settings')}
-                  onUpdateProfile={setProfile}
-                />
+                <div key={dashboardResetKey}>
+                  <Dashboard 
+                    profile={profile} 
+                    onLogShift={handleLogShift}
+                    onNavigateToSettings={() => setActiveTab('settings')}
+                    onUpdateProfile={setProfile}
+                  />
+                </div>
               )}
 
               {activeTab === 'history' && (

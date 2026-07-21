@@ -123,7 +123,7 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
   // Helper styles and content for Submit/Log Button (Desktop and Sticky Mobile)
   const getButtonStyles = (isMobile: boolean) => {
     const displayClass = isMobile ? 'flex md:hidden w-full max-w-md' : 'hidden md:flex w-full';
-    const baseClass = `${displayClass} py-3.5 px-4 rounded-xl font-semibold text-sm transition-all duration-300 items-center justify-center gap-2 shadow-2xl border`;
+    const baseClass = `${displayClass} py-3.5 px-4 rounded-xl font-bold text-base transition-all duration-300 items-center justify-center gap-2 shadow-2xl border`;
 
     if (!canSubmit) {
       return `${baseClass} bg-zinc-800/40 text-zinc-500 border-zinc-900/60 cursor-not-allowed`;
@@ -408,7 +408,7 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
               
               {/* Quick Platform Badges with brand identity colors */}
               <div className="space-y-1.5">
-                <span className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider select-none">
+                <span className="block text-xs sm:text-sm font-black text-zinc-400 uppercase tracking-wider select-none">
                   Quick Select Platform
                 </span>
                 <div className="flex flex-wrap gap-1.5">
@@ -439,14 +439,14 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                 {/* 1. Gross Revenue with Dedicated Row for Touch-Friendly Quick Add buttons */}
                 <div className="bg-zinc-900/40 border border-zinc-900/90 py-4 px-4.5 rounded-xl relative focus-within:border-emerald-500/50 transition-all">
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1 select-none">
+                    <label className="text-xs sm:text-sm font-black text-zinc-300 uppercase tracking-wider flex items-center gap-1 select-none">
                       <DollarSign className="w-3.5 h-3.5 text-emerald-400" /> Gross Income
                     </label>
-                    <span className="text-[10px] text-zinc-500 font-medium font-sans select-none">What driver app shows</span>
+                    <span className="text-xs text-zinc-500 font-semibold font-sans select-none">What driver app shows</span>
                   </div>
                   
                   <div className="relative mt-1">
-                    <span className="absolute left-1 top-1/2 -translate-y-1/2 text-2xl font-bold text-zinc-500 font-mono select-none">
+                    <span className="absolute left-1 top-1/2 -translate-y-1/2 text-3xl font-black text-zinc-500 font-mono select-none">
                       {profile.measurementSystem === 'uk' ? '£' : profile.measurementSystem === 'metric' ? '€' : '$'}
                     </span>
                     <input
@@ -457,7 +457,7 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                       value={grossRevenueInput}
                       onChange={(e) => setGrossRevenueInput(e.target.value)}
                       required
-                      className="w-full bg-transparent border-none text-zinc-100 pl-6 pr-1 text-2xl font-black font-mono focus:outline-none focus:ring-0 py-2.5"
+                      className="w-full bg-transparent border-none text-zinc-100 pl-6 pr-1 text-3xl font-black font-mono focus:outline-none focus:ring-0 py-2.5"
                     />
                   </div>
 
@@ -479,10 +479,10 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                 {/* 2. Shift Distance */}
                 <div className="bg-zinc-900/40 border border-zinc-900/90 py-4 px-4.5 rounded-xl relative focus-within:border-emerald-500/50 transition-all">
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1 select-none">
+                    <label className="text-xs sm:text-sm font-black text-zinc-300 uppercase tracking-wider flex items-center gap-1 select-none">
                       <Milestone className="w-3.5 h-3.5 text-amber-500" /> Distance
                     </label>
-                    <span className="text-[10px] text-zinc-500 font-medium font-sans select-none">Odometer or trip miles</span>
+                    <span className="text-xs text-zinc-500 font-semibold font-sans select-none">Odometer or trip miles</span>
                   </div>
                   <div className="relative mt-1">
                     <input
@@ -493,9 +493,9 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                       value={distanceInput}
                       onChange={(e) => setDistanceInput(e.target.value)}
                       required
-                      className="w-full bg-transparent border-none text-zinc-100 pr-12 text-2xl font-black font-mono focus:outline-none focus:ring-0 py-2.5"
+                      className="w-full bg-transparent border-none text-zinc-100 pr-12 text-3xl font-black font-mono focus:outline-none focus:ring-0 py-2.5"
                     />
-                    <span className="absolute right-1 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-500 font-mono">
+                    <span className="absolute right-1 top-1/2 -translate-y-1/2 text-base font-bold text-zinc-500 font-mono">
                       {profile.distanceUnit}
                     </span>
                   </div>
@@ -504,10 +504,10 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                 {/* 3. Hours Online */}
                 <div className="bg-zinc-900/40 border border-zinc-900/90 py-4 px-4.5 rounded-xl relative focus-within:border-emerald-500/50 transition-all">
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1 select-none">
+                    <label className="text-xs sm:text-sm font-black text-zinc-300 uppercase tracking-wider flex items-center gap-1 select-none">
                       <Clock className="w-3.5 h-3.5 text-blue-400" /> Time Online
                     </label>
-                    <span className="text-[10px] text-zinc-500 font-medium font-sans select-none">Total duration of shift</span>
+                    <span className="text-xs text-zinc-500 font-semibold font-sans select-none">Total duration of shift</span>
                   </div>
                   
                   {/* Dual Input Slot: Hours & Minutes */}
@@ -519,9 +519,9 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                         placeholder="0"
                         value={hoursPart}
                         onChange={(e) => setHoursPart(e.target.value)}
-                        className="w-full bg-transparent border-none text-zinc-100 pr-8 text-2xl font-black font-mono focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none py-2.5"
+                        className="w-full bg-transparent border-none text-zinc-100 pr-8 text-3xl font-black font-mono focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none py-2.5"
                       />
-                      <span className="absolute right-1 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-500 font-mono">hrs</span>
+                      <span className="absolute right-1 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-500 font-mono">hrs</span>
                     </div>
                     
                     <span className="text-zinc-600 font-bold font-mono text-xl select-none">:</span>
@@ -539,9 +539,9 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                             setMinutesPart(val);
                           }
                         }}
-                        className="w-full bg-transparent border-none text-zinc-100 pr-8 text-2xl font-black font-mono focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none py-2.5"
+                        className="w-full bg-transparent border-none text-zinc-100 pr-8 text-3xl font-black font-mono focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none py-2.5"
                       />
-                      <span className="absolute right-1 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-500 font-mono">min</span>
+                      <span className="absolute right-1 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-500 font-mono">min</span>
                     </div>
                   </div>
                 </div>
@@ -773,7 +773,7 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
               {/* Date & Fuel Price side-by-side inside high-density horizontal layout */}
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <div>
-                  <label className="block text-[11px] font-semibold text-zinc-400 mb-1 uppercase tracking-wider select-none">
+                  <label className="block text-xs sm:text-sm font-bold text-zinc-400 mb-1.5 uppercase tracking-wider select-none">
                     Shift Date
                   </label>
                   <input
@@ -781,17 +781,17 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                     value={shiftDate}
                     onChange={(e) => setShiftDate(e.target.value)}
                     required
-                    className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-mono"
+                    className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 px-3 py-2 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-zinc-400 mb-1 uppercase tracking-wider flex items-center justify-between select-none">
+                  <label className="block text-xs sm:text-sm font-bold text-zinc-400 mb-1.5 uppercase tracking-wider flex items-center justify-between select-none">
                     <span>Fuel Override</span>
                     {Math.abs((parseFloat(activeFuelPrice) || 0) - profile.fuelPrice) > 0.001 && (
                       <button 
                         type="button" 
                         onClick={() => setActiveFuelPrice(profile.fuelPrice.toString())}
-                        className="text-[9px] text-emerald-400 hover:text-emerald-300 font-mono underline"
+                        className="text-[10px] text-emerald-400 hover:text-emerald-300 font-mono underline"
                         title="Reset Default"
                       >
                         Reset
@@ -799,7 +799,7 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                     )}
                   </label>
                   <div className="relative">
-                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 font-mono font-semibold text-xs">
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 font-mono font-semibold text-sm">
                       {profile.measurementSystem === 'uk' ? '£' : profile.measurementSystem === 'metric' ? '€' : '$'}
                     </span>
                     <input
@@ -809,7 +809,7 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                       value={activeFuelPrice}
                       onChange={(e) => setActiveFuelPrice(e.target.value)}
                       required
-                      className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 pl-5.5 pr-8 py-2 rounded-xl text-xs focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-mono"
+                      className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 pl-6 pr-8 py-2 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-mono"
                     />
                     <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-semibold text-zinc-500">
                       /{profile.fuelUnit === 'gallons' ? 'gal' : 'L'}

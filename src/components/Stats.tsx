@@ -398,19 +398,19 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
             <div className="bg-emerald-950/80 border border-emerald-800 p-2.5 rounded-xl text-emerald-400 shrink-0">
               <Sparkles className="w-4 h-4" />
             </div>
-            <h3 className="font-display font-semibold text-sm text-zinc-100 uppercase tracking-wider">
+            <h3 className="font-display font-bold text-base text-zinc-100 uppercase tracking-wider">
               Smart Gig Driver Recommendation
             </h3>
           </div>
           
           {/* Body content breakout (Full width) */}
           <div className="pt-1">
-            <p className="text-xs text-zinc-300/90 leading-relaxed">
+            <p className="text-sm text-zinc-350 leading-relaxed">
               {topPlatform && topPlatform.hourly > 0 ? (
                 <>
-                  Based on your real cost auditing, <span className="font-bold text-emerald-400">{topPlatform.platform}</span> is your highest-yielding platform at{' '}
-                  <span className="font-bold text-emerald-300 font-mono">{formatCurrency(topPlatform.hourly, profile)}/hr</span> net (after depreciation and gas). 
-                  Your general business overhead takes up <span className="font-bold font-mono text-amber-400">{summary.expenseRatio.toFixed(0)}%</span> of your total gross income. Keep focusing on high-tip, lower-mileage runs to increase this profit margin.
+                  Based on your real cost auditing, <span className="font-black text-emerald-400">{topPlatform.platform}</span> is your highest-yielding platform at{' '}
+                  <span className="font-black text-emerald-350 font-mono">{formatCurrency(topPlatform.hourly, profile)}/hr</span> net (after depreciation and gas). 
+                  Your general business overhead takes up <span className="font-black font-mono text-amber-400">{summary.expenseRatio.toFixed(0)}%</span> of your total gross income. Keep focusing on high-tip, lower-mileage runs to increase this profit margin.
                 </>
               ) : (
                 "Your logged shifts show an active profit. Continue tracking mileage to construct a perfect cost model for tax deductions."
@@ -425,13 +425,13 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
         {/* Top Row: Full-Width Premium Card */}
         <div className="bg-zinc-950 border border-emerald-500/30 p-6 rounded-2xl relative overflow-hidden font-mono shadow-lg shadow-emerald-950/10">
           <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/[0.03] rounded-full blur-2xl"></div>
-          <span className="text-xs text-emerald-400 uppercase tracking-widest block font-sans font-bold">
+          <span className="text-sm text-emerald-400 uppercase tracking-widest block font-sans font-black">
             Total Real Profit
           </span>
-          <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-emerald-400 mt-3 block tracking-tight">
+          <span className="text-4xl sm:text-5xl md:text-6xl font-black text-emerald-400 mt-3 block tracking-tight">
             {formatCurrency(summary.totalNet, profile)}
           </span>
-          <span className="text-xs text-zinc-500 mt-3 block font-sans">
+          <span className="text-xs sm:text-sm text-zinc-500 mt-3 block font-sans">
             Tax deductible ready • Fully audited gig net earnings
           </span>
         </div>
@@ -441,14 +441,14 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
           {/* Real Net Hourly */}
           <div className="bg-zinc-950 border border-zinc-900/80 p-3.5 pb-5.5 sm:p-5 sm:pb-7 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
             <div>
-              <span className="text-[9px] sm:text-[10px] text-zinc-400 uppercase tracking-wider block font-sans font-bold">
+              <span className="text-[10px] sm:text-xs text-zinc-400 uppercase tracking-wider block font-sans font-black">
                 Real Net Hourly
               </span>
-              <span className="text-base sm:text-lg md:text-2xl font-extrabold text-zinc-100 mt-2 block">
-                {formatCurrency(summary.realNetHourlyActive, profile)}<span className="text-[10px] sm:text-xs font-normal text-zinc-500">/hr</span>
+              <span className="text-lg sm:text-xl md:text-3xl font-black text-zinc-100 mt-2 block">
+                {formatCurrency(summary.realNetHourlyActive, profile)}<span className="text-xs font-normal text-zinc-500">/hr</span>
               </span>
             </div>
-            <span className="text-[9px] sm:text-[10px] text-zinc-400 mt-2 block font-sans leading-tight">
+            <span className="text-xs text-zinc-400 mt-2 block font-sans leading-tight">
               Gross Active: {formatCurrency(summary.averageGrossHourlyActive, profile)}/hr
             </span>
           </div>
@@ -456,14 +456,14 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
           {/* Net per Hour */}
           <div className="bg-zinc-950 border border-zinc-900/80 p-3.5 pb-5.5 sm:p-5 sm:pb-7 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
             <div>
-              <span className="text-[9px] sm:text-[10px] text-zinc-400 uppercase tracking-wider block font-sans font-bold">
+              <span className="text-[10px] sm:text-xs text-zinc-400 uppercase tracking-wider block font-sans font-black">
                 Net per Hour
               </span>
-              <span className="text-base sm:text-lg md:text-2xl font-extrabold text-zinc-100 mt-2 block">
-                {formatCurrency(summary.netPerHourOnline, profile)}<span className="text-[10px] sm:text-xs font-normal text-zinc-500">/hr</span>
+              <span className="text-lg sm:text-xl md:text-3xl font-black text-zinc-100 mt-2 block">
+                {formatCurrency(summary.netPerHourOnline, profile)}<span className="text-xs font-normal text-zinc-500">/hr</span>
               </span>
             </div>
-            <span className="text-[9px] sm:text-[10px] text-zinc-400 mt-2 block font-sans leading-tight">
+            <span className="text-xs text-zinc-400 mt-2 block font-sans leading-tight">
               True hourly take-home
             </span>
           </div>
@@ -471,14 +471,14 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
           {/* Shift Break-Even */}
           <div className="bg-zinc-950 border border-zinc-900/80 p-3.5 pb-5.5 sm:p-5 sm:pb-7 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
             <div>
-              <span className="text-[9px] sm:text-[10px] text-zinc-400 uppercase tracking-wider block font-sans font-bold">
+              <span className="text-[10px] sm:text-xs text-zinc-400 uppercase tracking-wider block font-sans font-black">
                 Shift Break-Even
               </span>
-              <span className="text-base sm:text-lg md:text-2xl font-extrabold text-amber-400 mt-2 block">
+              <span className="text-lg sm:text-xl md:text-3xl font-black text-amber-400 mt-2 block">
                 {formatCurrency(summary.totalCosts, profile)}
               </span>
             </div>
-            <span className="text-[9px] sm:text-[10px] text-zinc-400 mt-2 block font-sans leading-tight">
+            <span className="text-xs text-zinc-400 mt-2 block font-sans leading-tight">
               Gross needed to cover costs
             </span>
           </div>
@@ -489,14 +489,14 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
           {/* Total Distance */}
           <div className="bg-zinc-950 border border-zinc-900/80 p-3.5 pb-5.5 sm:p-5 sm:pb-7 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
             <div>
-              <span className="text-[9px] sm:text-[10px] text-zinc-400 uppercase tracking-wider block font-sans font-bold">
+              <span className="text-[10px] sm:text-xs text-zinc-400 uppercase tracking-wider block font-sans font-black">
                 Total Distance
               </span>
-              <span className="text-base sm:text-lg md:text-2xl font-extrabold text-zinc-100 mt-2 block">
-                {summary.totalDistance.toLocaleString()} <span className="text-[10px] sm:text-xs font-normal text-zinc-500">{distanceUnit}</span>
+              <span className="text-lg sm:text-xl md:text-3xl font-black text-zinc-100 mt-2 block">
+                {summary.totalDistance.toLocaleString()} <span className="text-xs font-normal text-zinc-500">{distanceUnit}</span>
               </span>
             </div>
-            <span className="text-[9px] sm:text-[10px] text-zinc-400 mt-2 block font-sans leading-tight">
+            <span className="text-xs text-zinc-400 mt-2 block font-sans leading-tight">
               Across {logs.length} logged shifts
             </span>
           </div>
@@ -504,14 +504,14 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
           {/* Net per Mile */}
           <div className="bg-zinc-950 border border-zinc-900/80 p-3.5 pb-5.5 sm:p-5 sm:pb-7 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
             <div>
-              <span className="text-[9px] sm:text-[10px] text-zinc-400 uppercase tracking-wider block font-sans font-bold">
+              <span className="text-[10px] sm:text-xs text-zinc-400 uppercase tracking-wider block font-sans font-black">
                 Net per {distanceUnit === 'miles' ? 'Mile' : 'km'}
               </span>
-              <span className="text-base sm:text-lg md:text-2xl font-extrabold text-blue-400 mt-2 block">
-                {formatCurrency(summary.netPerDistance, profile)}<span className="text-[10px] sm:text-xs font-normal text-zinc-500">/{distanceUnit === 'miles' ? 'mi' : 'km'}</span>
+              <span className="text-lg sm:text-xl md:text-3xl font-black text-blue-400 mt-2 block">
+                {formatCurrency(summary.netPerDistance, profile)}<span className="text-xs font-normal text-zinc-500">/{distanceUnit === 'miles' ? 'mi' : 'km'}</span>
               </span>
             </div>
-            <span className="text-[9px] sm:text-[10px] text-zinc-400 mt-2 block font-sans leading-tight">
+            <span className="text-xs text-zinc-400 mt-2 block font-sans leading-tight">
               True asset efficiency
             </span>
           </div>
@@ -519,14 +519,14 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
           {/* Overhead Costs */}
           <div className="bg-zinc-950 border border-zinc-900/80 p-3.5 pb-5.5 sm:p-5 sm:pb-7 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
             <div>
-              <span className="text-[9px] sm:text-[10px] text-rose-400 uppercase tracking-wider block font-sans font-bold">
+              <span className="text-[10px] sm:text-xs text-rose-400 uppercase tracking-wider block font-sans font-black">
                 Overhead Costs
               </span>
-              <span className="text-base sm:text-lg md:text-2xl font-extrabold text-rose-400 mt-2 block">
+              <span className="text-lg sm:text-xl md:text-3xl font-black text-rose-400 mt-2 block">
                 {formatCurrency(summary.totalCosts, profile)}
               </span>
             </div>
-            <span className="text-[9px] sm:text-[10px] text-zinc-400 mt-2 block font-sans leading-tight">
+            <span className="text-xs text-zinc-400 mt-2 block font-sans leading-tight">
               {summary.expenseRatio.toFixed(0)}% of revenue to expenses
             </span>
           </div>

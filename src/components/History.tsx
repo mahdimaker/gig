@@ -124,12 +124,12 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
             placeholder="Search shifts (e.g. airport surge, rain, Lyft...)"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+            className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 pl-10 pr-4 py-2.5 rounded-xl text-base focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
           />
           {searchTerm && (
             <button 
               onClick={() => setSearchTerm('')}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 text-xs font-semibold"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 text-sm font-semibold"
             >
               Clear
             </button>
@@ -140,15 +140,15 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
         <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center w-full gap-4" id="history-controls-row">
           
           {/* Platform filter */}
-          <div className="flex items-center justify-between sm:justify-start gap-2 bg-zinc-900/60 border border-zinc-800 px-3.5 py-2.5 rounded-xl text-xs text-zinc-400 w-full sm:w-auto">
+          <div className="flex items-center justify-between sm:justify-start gap-2 bg-zinc-900/60 border border-zinc-800 px-3.5 py-2.5 rounded-xl text-sm text-zinc-400 w-full sm:w-auto">
             <div className="flex items-center gap-2">
-              <Filter className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Platform:</span>
+              <Filter className="w-4 h-4 text-emerald-400" />
+              <span className="font-semibold text-zinc-350">Platform:</span>
             </div>
             <select
               value={selectedPlatformFilter}
               onChange={(e) => setSelectedPlatformFilter(e.target.value)}
-              className="bg-transparent border-none text-zinc-200 focus:outline-none focus:ring-0 font-semibold cursor-pointer text-right sm:text-left"
+              className="bg-transparent border-none text-zinc-200 focus:outline-none focus:ring-0 font-bold cursor-pointer text-right sm:text-left text-sm"
             >
               <option value="All" className="bg-zinc-950">All Platforms</option>
               {PLATFORMS.map(p => (
@@ -161,7 +161,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               onClick={() => handleSort('date')}
-              className={`px-3 sm:px-4 py-2.5 rounded-xl border text-xs font-mono font-medium transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-initial ${
+              className={`px-3 sm:px-4 py-2.5 rounded-xl border text-sm font-mono font-bold transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-initial ${
                 sortField === 'date' 
                   ? 'bg-emerald-950/40 border-emerald-800 text-emerald-400 font-bold' 
                   : 'bg-zinc-900/40 border-zinc-800/80 text-zinc-400 hover:border-zinc-700'
@@ -171,7 +171,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
             </button>
             <button
               onClick={() => handleSort('netProfit')}
-              className={`px-3 sm:px-4 py-2.5 rounded-xl border text-xs font-mono font-medium transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-initial ${
+              className={`px-3 sm:px-4 py-2.5 rounded-xl border text-sm font-mono font-bold transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-initial ${
                 sortField === 'netProfit' 
                   ? 'bg-emerald-950/40 border-emerald-800 text-emerald-400 font-bold' 
                   : 'bg-zinc-900/40 border-zinc-800/80 text-zinc-400 hover:border-zinc-700'
@@ -181,7 +181,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
             </button>
             <button
               onClick={() => handleSort('hourlyWage')}
-              className={`px-3 sm:px-4 py-2.5 rounded-xl border text-xs font-mono font-medium transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-initial ${
+              className={`px-3 sm:px-4 py-2.5 rounded-xl border text-sm font-mono font-bold transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-initial ${
                 sortField === 'hourlyWage' 
                   ? 'bg-emerald-950/40 border-emerald-800 text-emerald-400 font-bold' 
                   : 'bg-zinc-900/40 border-zinc-800/80 text-zinc-400 hover:border-zinc-700'
@@ -201,21 +201,21 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
       {processedLogs.length > 0 && (
         <section className="grid grid-cols-2 md:grid-cols-4 gap-3.5" id="filtered-history-mini-dashboard">
           <div className="bg-zinc-950 border border-zinc-900/80 p-4 rounded-xl font-mono">
-            <span className="text-[10px] text-zinc-500 uppercase tracking-wider block">Filtered Shifts</span>
-            <span className="text-xl font-bold text-zinc-200 mt-1 block">{totals.count} entries</span>
+            <span className="text-xs text-zinc-400 uppercase tracking-wider block font-bold">Filtered Shifts</span>
+            <span className="text-2xl font-black text-zinc-100 mt-1 block">{totals.count} entries</span>
           </div>
           <div className="bg-zinc-950 border border-zinc-900/80 p-4 rounded-xl font-mono">
-            <span className="text-[10px] text-zinc-500 uppercase tracking-wider block">Filtered Gross</span>
-            <span className="text-xl font-bold text-zinc-200 mt-1 block">{formatCurrency(totals.gross, profile)}</span>
+            <span className="text-xs text-zinc-400 uppercase tracking-wider block font-bold">Filtered Gross</span>
+            <span className="text-2xl font-black text-zinc-100 mt-1 block">{formatCurrency(totals.gross, profile)}</span>
           </div>
           <div className="bg-zinc-950 border border-emerald-950 p-4 rounded-xl font-mono relative overflow-hidden">
             <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/[0.02] rounded-full blur-xl"></div>
-            <span className="text-[10px] text-emerald-500 uppercase tracking-wider block font-semibold">Filtered Net Profit</span>
-            <span className="text-xl font-bold text-emerald-400 mt-1 block">{formatCurrency(totals.profit, profile)}</span>
+            <span className="text-xs text-emerald-500 uppercase tracking-wider block font-black">Filtered Net Profit</span>
+            <span className="text-2xl font-black text-emerald-400 mt-1 block">{formatCurrency(totals.profit, profile)}</span>
           </div>
           <div className="bg-zinc-950 border border-zinc-900/80 p-4 rounded-xl font-mono">
-            <span className="text-[10px] text-zinc-500 uppercase tracking-wider block">Avg Net Wage</span>
-            <span className="text-xl font-bold text-zinc-200 mt-1 block">{formatCurrency(totals.avgHourly, profile)}/hr</span>
+            <span className="text-xs text-zinc-400 uppercase tracking-wider block font-bold">Avg Net Wage</span>
+            <span className="text-2xl font-black text-zinc-100 mt-1 block">{formatCurrency(totals.avgHourly, profile)}/hr</span>
           </div>
         </section>
       )}

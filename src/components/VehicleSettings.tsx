@@ -69,6 +69,15 @@ export default function VehicleSettings({
 
   // Sync state if profile is updated from outside (e.g. loaded sample logs or initialized)
   React.useEffect(() => {
+    setMake(profile.make);
+    setModel(profile.model);
+    setYear(profile.year.toString());
+    setFuelConsumption(profile.fuelConsumption.toString());
+    setFuelPrice(profile.fuelPrice.toString());
+    setDepreciationRate(profile.depreciationRate.toString());
+    setDistanceUnit(profile.distanceUnit);
+    setFuelUnit(profile.fuelUnit);
+    setMeasurementSystem(profile.measurementSystem || (profile.distanceUnit === 'miles' && profile.fuelUnit === 'liters' ? 'uk' : profile.distanceUnit === 'km' ? 'metric' : 'us'));
     setTollsDefault((profile.expenseDefaults?.tolls ?? 5.00).toString());
     setCarWashDefault((profile.expenseDefaults?.carWash ?? 14.00).toString());
     setParkingDefault((profile.expenseDefaults?.parking ?? 4.00).toString());
@@ -230,7 +239,7 @@ export default function VehicleSettings({
               
               {/* Distance & Fuel Unit Selection */}
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2.5">
+                <label className="block text-sm font-black text-zinc-300 uppercase tracking-wider mb-2.5">
                   Unit Measurement System
                 </label>
                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
@@ -272,8 +281,8 @@ export default function VehicleSettings({
                         </g>
                       </svg>
                     </div>
-                    <span className="font-sans font-bold text-[11px] sm:text-xs text-zinc-200 mt-1">US Imperial</span>
-                    <span className="text-[9px] sm:text-[10px] font-mono text-zinc-500 leading-tight">mi, gal, MPG</span>
+                    <span className="font-sans font-bold text-xs sm:text-sm text-zinc-200 mt-1">US Imperial</span>
+                    <span className="text-[10px] sm:text-xs font-mono text-zinc-500 leading-tight">mi, gal, MPG</span>
                   </button>
 
                   <button
@@ -306,8 +315,8 @@ export default function VehicleSettings({
                         </g>
                       </svg>
                     </div>
-                    <span className="font-sans font-bold text-[11px] sm:text-xs text-zinc-200 mt-1">Metric</span>
-                    <span className="text-[9px] sm:text-[10px] font-mono text-zinc-500 leading-tight">km, L, L/100km</span>
+                    <span className="font-sans font-bold text-xs sm:text-sm text-zinc-200 mt-1">Metric</span>
+                    <span className="text-[10px] sm:text-xs font-mono text-zinc-500 leading-tight">km, L, L/100km</span>
                   </button>
 
                   <button
@@ -330,58 +339,58 @@ export default function VehicleSettings({
                         <path d="M16 0 V32 M0 16 H32" stroke="#C8102E" strokeWidth="3.2"/>
                       </svg>
                     </div>
-                    <span className="font-sans font-bold text-[11px] sm:text-xs text-zinc-200 mt-1">UK System</span>
-                    <span className="text-[9px] sm:text-[10px] font-mono text-zinc-500 leading-tight">mi, L, UK MPG</span>
+                    <span className="font-sans font-bold text-xs sm:text-sm text-zinc-200 mt-1">UK System</span>
+                    <span className="text-[10px] sm:text-xs font-mono text-zinc-500 leading-tight">mi, L, UK MPG</span>
                   </button>
                 </div>
               </div>
 
               {/* Car Make Model and Year fields */}
-              <div className="space-y-4 pt-3 border-t border-zinc-900">
-                <h3 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+              <div className="space-y-4 pt-4 border-t border-zinc-900">
+                <h3 className="text-sm font-black text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
                   <Car className="w-4 h-4 text-emerald-400" /> Vehicle Information
                 </h3>
                 
                 <div className="grid grid-cols-3 gap-3">
                   <div className="col-span-1">
-                    <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">Year</label>
+                    <label className="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5">Year</label>
                     <input
                       type="number"
                       required
                       placeholder="2021"
                       value={year}
                       onChange={(e) => setYear(e.target.value)}
-                      className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 px-3 py-2 rounded-xl text-sm focus:outline-none focus:border-emerald-500 font-mono"
+                      className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-emerald-500 font-mono"
                     />
                   </div>
                   <div className="col-span-1">
-                    <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">Make</label>
+                    <label className="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5">Make</label>
                     <input
                       type="text"
                       required
                       placeholder="Toyota"
                       value={make}
                       onChange={(e) => setMake(e.target.value)}
-                      className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 px-3 py-2 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
                     />
                   </div>
                   <div className="col-span-1">
-                    <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">Model</label>
+                    <label className="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5">Model</label>
                     <input
                       type="text"
                       required
                       placeholder="Prius"
                       value={model}
                       onChange={(e) => setModel(e.target.value)}
-                      className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 px-3 py-2 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Rates Calibration and Tuning */}
-              <div className="space-y-4 pt-3 border-t border-zinc-900">
-                <h3 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+              <div className="space-y-4 pt-4 border-t border-zinc-900">
+                <h3 className="text-sm font-black text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
                   <Coins className="w-4 h-4 text-emerald-400" /> Expense Calibration Rates
                 </h3>
 
@@ -389,7 +398,7 @@ export default function VehicleSettings({
                   
                   {/* Fuel consumption */}
                   <div>
-                    <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">
+                    <label className="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5">
                       Fuel Consumption
                     </label>
                     <div className="relative">
@@ -413,7 +422,7 @@ export default function VehicleSettings({
 
                   {/* Fuel Price */}
                   <div>
-                    <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">
+                    <label className="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5">
                       Fuel Price ({measurementSystem === 'uk' ? 'GBP' : measurementSystem === 'metric' ? 'EUR' : 'USD'})
                     </label>
                     <div className="relative">
@@ -438,7 +447,7 @@ export default function VehicleSettings({
 
                   {/* Depreciation Rate */}
                   <div>
-                    <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">
+                    <label className="block text-xs sm:text-sm font-bold text-zinc-300 mb-1.5">
                       Depreciation / Unit ({measurementSystem === 'uk' ? '£/mi' : measurementSystem === 'metric' ? '€/km' : '$/mi'})
                     </label>
                     <div className="relative">
@@ -462,7 +471,7 @@ export default function VehicleSettings({
                     
                     {/* Depreciation smart presets */}
                     <div className="mt-4 space-y-2">
-                      <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                      <label className="block text-xs font-black text-zinc-300 uppercase tracking-wider">
                         Quick Vehicle Depreciation Tiers
                       </label>
                       <div className="grid grid-cols-3 gap-2 sm:gap-3">
@@ -523,14 +532,14 @@ export default function VehicleSettings({
               {/* Save profile actions */}
               <div className="pt-5 border-t border-zinc-900 flex flex-col items-center gap-3">
                 {saveSuccess && (
-                  <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1.5 animate-pulse">
+                  <span className="text-sm text-emerald-400 font-bold flex items-center gap-1.5 animate-pulse">
                     <Check className="w-4 h-4" /> Vehicle rates successfully saved!
                   </span>
                 )}
                 
                 <button
                   type="submit"
-                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-bold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-emerald-950/20 active:scale-[0.98] cursor-pointer text-center"
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-black text-base font-bold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-emerald-950/20 active:scale-[0.98] cursor-pointer text-center"
                   id="save-vehicle-settings-button"
                 >
                   Save Active Configurations
