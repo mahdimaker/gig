@@ -85,6 +85,7 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
     const averageGrossHourlyActive = totalActiveHours > 0 ? totalGross / totalActiveHours : 0;
     const netPerHourOnline = totalHours > 0 ? totalNet / totalHours : 0;
     const netPerDistance = totalDistance > 0 ? totalNet / totalDistance : 0;
+    const breakEvenHourly = totalHours > 0 ? totalCosts / totalHours : 0;
     
     const expenseRatio = totalGross > 0 ? (totalCosts / totalGross) * 100 : 0;
     const profitMargin = totalGross > 0 ? (totalNet / totalGross) * 100 : 0;
@@ -105,6 +106,7 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
       averageGrossHourlyActive,
       netPerHourOnline,
       netPerDistance,
+      breakEvenHourly,
       expenseRatio,
       profitMargin,
     };
@@ -436,97 +438,94 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
           </span>
         </div>
 
-        {/* Middle Row: 3-Column Horizontal Grid */}
-        <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
-          {/* Real Net Hourly */}
-          <div className="bg-zinc-950 border border-zinc-900/80 p-3.5 pb-5.5 sm:p-5 sm:pb-7 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
+        {/* Middle & Bottom Rows: 2-Column Grid on Mobile, 3-Column on Desktop */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+          {/* Row 1, Item 1: Real Net Hourly */}
+          <div className="bg-zinc-950 border border-zinc-900/80 p-4 sm:p-5 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
             <div>
-              <span className="text-[10px] sm:text-xs text-zinc-400 uppercase tracking-wider block font-sans font-black">
+              <span className="text-xs sm:text-sm text-zinc-300 uppercase tracking-wider block font-sans font-bold">
                 Real Net Hourly
               </span>
-              <span className="text-lg sm:text-xl md:text-3xl font-black text-zinc-100 mt-2 block">
-                {formatCurrency(summary.realNetHourlyActive, profile)}<span className="text-xs font-normal text-zinc-500">/hr</span>
+              <span className="text-xl sm:text-2xl md:text-3xl font-black text-zinc-100 mt-1.5 block">
+                {formatCurrency(summary.realNetHourlyActive, profile)}<span className="text-xs sm:text-sm font-normal text-zinc-400">/hr</span>
               </span>
             </div>
-            <span className="text-xs text-zinc-400 mt-2 block font-sans leading-tight">
+            <span className="text-xs sm:text-sm text-zinc-400 mt-2 block font-sans leading-snug">
               Gross Active: {formatCurrency(summary.averageGrossHourlyActive, profile)}/hr
             </span>
           </div>
 
-          {/* Net per Hour */}
-          <div className="bg-zinc-950 border border-zinc-900/80 p-3.5 pb-5.5 sm:p-5 sm:pb-7 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
+          {/* Row 1, Item 2: Net per Hour */}
+          <div className="bg-zinc-950 border border-zinc-900/80 p-4 sm:p-5 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
             <div>
-              <span className="text-[10px] sm:text-xs text-zinc-400 uppercase tracking-wider block font-sans font-black">
+              <span className="text-xs sm:text-sm text-zinc-300 uppercase tracking-wider block font-sans font-bold">
                 Net per Hour
               </span>
-              <span className="text-lg sm:text-xl md:text-3xl font-black text-zinc-100 mt-2 block">
-                {formatCurrency(summary.netPerHourOnline, profile)}<span className="text-xs font-normal text-zinc-500">/hr</span>
+              <span className="text-xl sm:text-2xl md:text-3xl font-black text-zinc-100 mt-1.5 block">
+                {formatCurrency(summary.netPerHourOnline, profile)}<span className="text-xs sm:text-sm font-normal text-zinc-400">/hr</span>
               </span>
             </div>
-            <span className="text-xs text-zinc-400 mt-2 block font-sans leading-tight">
+            <span className="text-xs sm:text-sm text-zinc-400 mt-2 block font-sans leading-snug">
               True hourly take-home
             </span>
           </div>
 
-          {/* Shift Break-Even */}
-          <div className="bg-zinc-950 border border-zinc-900/80 p-3.5 pb-5.5 sm:p-5 sm:pb-7 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
+          {/* Row 2, Item 1: Total Distance */}
+          <div className="bg-zinc-950 border border-zinc-900/80 p-4 sm:p-5 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
             <div>
-              <span className="text-[10px] sm:text-xs text-zinc-400 uppercase tracking-wider block font-sans font-black">
-                Shift Break-Even
-              </span>
-              <span className="text-lg sm:text-xl md:text-3xl font-black text-amber-400 mt-2 block">
-                {formatCurrency(summary.totalCosts, profile)}
-              </span>
-            </div>
-            <span className="text-xs text-zinc-400 mt-2 block font-sans leading-tight">
-              Gross needed to cover costs
-            </span>
-          </div>
-        </div>
-
-        {/* Bottom Row: 3-Column Horizontal Grid */}
-        <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
-          {/* Total Distance */}
-          <div className="bg-zinc-950 border border-zinc-900/80 p-3.5 pb-5.5 sm:p-5 sm:pb-7 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
-            <div>
-              <span className="text-[10px] sm:text-xs text-zinc-400 uppercase tracking-wider block font-sans font-black">
+              <span className="text-xs sm:text-sm text-zinc-300 uppercase tracking-wider block font-sans font-bold">
                 Total Distance
               </span>
-              <span className="text-lg sm:text-xl md:text-3xl font-black text-zinc-100 mt-2 block">
-                {summary.totalDistance.toLocaleString()} <span className="text-xs font-normal text-zinc-500">{distanceUnit}</span>
+              <span className="text-xl sm:text-2xl md:text-3xl font-black text-zinc-100 mt-1.5 block">
+                {summary.totalDistance.toLocaleString()} <span className="text-xs sm:text-sm font-normal text-zinc-400">{distanceUnit}</span>
               </span>
             </div>
-            <span className="text-xs text-zinc-400 mt-2 block font-sans leading-tight">
+            <span className="text-xs sm:text-sm text-zinc-400 mt-2 block font-sans leading-snug">
               Across {logs.length} logged shifts
             </span>
           </div>
 
-          {/* Net per Mile */}
-          <div className="bg-zinc-950 border border-zinc-900/80 p-3.5 pb-5.5 sm:p-5 sm:pb-7 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
+          {/* Row 2, Item 2: Net per Mile */}
+          <div className="bg-zinc-950 border border-zinc-900/80 p-4 sm:p-5 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
             <div>
-              <span className="text-[10px] sm:text-xs text-zinc-400 uppercase tracking-wider block font-sans font-black">
+              <span className="text-xs sm:text-sm text-zinc-300 uppercase tracking-wider block font-sans font-bold">
                 Net per {distanceUnit === 'miles' ? 'Mile' : 'km'}
               </span>
-              <span className="text-lg sm:text-xl md:text-3xl font-black text-blue-400 mt-2 block">
-                {formatCurrency(summary.netPerDistance, profile)}<span className="text-xs font-normal text-zinc-500">/{distanceUnit === 'miles' ? 'mi' : 'km'}</span>
+              <span className="text-xl sm:text-2xl md:text-3xl font-black text-blue-400 mt-1.5 block">
+                {formatCurrency(summary.netPerDistance, profile)}<span className="text-xs sm:text-sm font-normal text-zinc-400">/{distanceUnit === 'miles' ? 'mi' : 'km'}</span>
               </span>
             </div>
-            <span className="text-xs text-zinc-400 mt-2 block font-sans leading-tight">
+            <span className="text-xs sm:text-sm text-zinc-400 mt-2 block font-sans leading-snug">
               True asset efficiency
             </span>
           </div>
 
-          {/* Overhead Costs */}
-          <div className="bg-zinc-950 border border-zinc-900/80 p-3.5 pb-5.5 sm:p-5 sm:pb-7 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
+          {/* Row 3, Item 1: Break-Even / Hr */}
+          <div className="bg-zinc-950 border border-zinc-900/80 p-4 sm:p-5 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
             <div>
-              <span className="text-[10px] sm:text-xs text-rose-400 uppercase tracking-wider block font-sans font-black">
+              <span className="text-xs sm:text-sm text-zinc-300 uppercase tracking-wider block font-sans font-bold">
+                BREAK-EVEN / HR
+              </span>
+              <span className="text-xl sm:text-2xl md:text-3xl font-black text-amber-400 mt-1.5 block">
+                {formatCurrency(summary.breakEvenHourly, profile)}<span className="text-xs sm:text-sm font-normal text-zinc-400">/hr</span>
+              </span>
+            </div>
+            <span className="text-xs sm:text-sm text-zinc-400 mt-2 block font-sans leading-snug">
+              Min. gross income needed per hour to cover expenses
+            </span>
+          </div>
+
+          {/* Row 3, Item 2: Overhead Costs */}
+          <div className="bg-zinc-950 border border-zinc-900/80 p-4 sm:p-5 rounded-2xl relative overflow-hidden font-mono flex flex-col justify-between">
+            <div>
+              <span className="text-xs sm:text-sm text-rose-300 uppercase tracking-wider block font-sans font-bold">
                 Overhead Costs
               </span>
-              <span className="text-lg sm:text-xl md:text-3xl font-black text-rose-400 mt-2 block">
+              <span className="text-xl sm:text-2xl md:text-3xl font-black text-rose-400 mt-1.5 block">
                 {formatCurrency(summary.totalCosts, profile)}
               </span>
             </div>
-            <span className="text-xs text-zinc-400 mt-2 block font-sans leading-tight">
+            <span className="text-xs sm:text-sm text-zinc-400 mt-2 block font-sans leading-snug">
               {summary.expenseRatio.toFixed(0)}% of revenue to expenses
             </span>
           </div>
@@ -539,10 +538,10 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
         {/* Chart 2: Platform Efficiency & Net Margins */}
         <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-5 space-y-4">
           <div>
-            <h4 className="font-display font-semibold text-sm text-zinc-200 uppercase tracking-wider">
+            <h4 className="font-display font-bold text-base sm:text-lg text-zinc-100 uppercase tracking-wider">
               Platform Efficiency Rank
             </h4>
-            <p className="text-[11px] text-zinc-500 mt-0.5">
+            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
               Ranked by Real Net Hourly Wage. Which app gets you the best return?
             </p>
           </div>
@@ -557,29 +556,29 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
                   const isUber = plat.color === '#111111';
 
                   return (
-                    <div key={plat.platform} className="space-y-1.5 font-mono">
-                      <div className="flex justify-between items-center text-xs">
+                    <div key={plat.platform} className="space-y-2 font-mono">
+                      <div className="flex justify-between items-center text-sm sm:text-base">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-[10px] font-bold font-mono text-zinc-400 bg-zinc-900 border border-zinc-800/80 px-1.5 py-0.5 rounded-md min-w-[22px] text-center">
+                          <span className="text-xs sm:text-sm font-bold font-mono text-zinc-200 bg-zinc-900 border border-zinc-800/80 px-2 py-0.5 rounded-md min-w-[26px] text-center">
                             #{index + 1}
                           </span>
                           <span 
-                            className={`w-2.5 h-2.5 rounded-full shrink-0 ${isUber ? 'border border-zinc-500 shadow-[0_0_4px_rgba(255,255,255,0.25)]' : ''}`} 
+                            className={`w-3 h-3 rounded-full shrink-0 ${isUber ? 'border border-zinc-500 shadow-[0_0_4px_rgba(255,255,255,0.25)]' : ''}`} 
                             style={{ backgroundColor: plat.color }} 
                           />
-                          <span className="font-bold text-zinc-300">{plat.platform}</span>
-                          <span className="text-[10px] text-zinc-500 font-normal">({plat.shiftsCount} shifts)</span>
+                          <span className="font-bold text-zinc-100 text-sm sm:text-base">{plat.platform}</span>
+                          <span className="text-xs sm:text-sm text-zinc-400 font-medium">({plat.shiftsCount} shifts)</span>
                         </div>
                         <div className="text-right">
-                          <span className="text-emerald-400 font-extrabold">{formatCurrency(plat.hourly, profile)}/hr</span>
-                          <span className="text-[10px] text-zinc-500 block">Margin: {plat.margin.toFixed(0)}%</span>
+                          <span className="text-emerald-400 font-extrabold text-sm sm:text-base">{formatCurrency(plat.hourly, profile)}/hr</span>
+                          <span className="text-xs sm:text-sm text-zinc-400 font-medium block">Margin: {plat.margin.toFixed(0)}%</span>
                         </div>
                       </div>
 
                       {/* Horizontal wage comparison bar */}
-                      <div className="w-full bg-zinc-900/60 rounded-full h-2.5 overflow-hidden">
+                      <div className="w-full bg-zinc-900/60 rounded-full h-3 overflow-hidden">
                         <div 
-                          className={`h-2.5 rounded-full transition-all duration-500 ${isUber ? 'border border-zinc-700 shadow-[0_0_8px_rgba(255,255,255,0.15)] bg-zinc-950' : ''}`} 
+                          className={`h-3 rounded-full transition-all duration-500 ${isUber ? 'border border-zinc-700 shadow-[0_0_8px_rgba(255,255,255,0.15)] bg-zinc-950' : ''}`} 
                           style={{ 
                             width: `${barWidth}%`,
                             backgroundColor: plat.color 
@@ -592,14 +591,14 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
               </div>
             ) : (
               <div className="text-center py-5 bg-zinc-900/10 border border-zinc-900/40 border-dashed rounded-xl">
-                <span className="text-[11px] text-zinc-500 font-sans">No platforms have reached the 3-shift threshold to rank yet.</span>
+                <span className="text-xs sm:text-sm text-zinc-400 font-sans font-medium">No platforms have reached the 3-shift threshold to rank yet.</span>
               </div>
             )}
 
             {/* Insufficient Data Platforms */}
             {insufficientPlatforms.length > 0 && (
               <div className="pt-4 border-t border-zinc-900/60 space-y-3">
-                <span className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-wider block">
+                <span className="text-xs sm:text-sm font-bold text-zinc-400 uppercase tracking-wider block">
                   ⏳ Insufficient Data (Less than 3 shifts)
                 </span>
                 <div className="space-y-4">
@@ -610,30 +609,30 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
                     const isUber = plat.color === '#111111';
 
                     return (
-                      <div key={plat.platform} className="space-y-1.5 font-mono opacity-50 transition-opacity hover:opacity-75">
-                        <div className="flex justify-between items-center text-xs">
+                      <div key={plat.platform} className="space-y-2 font-mono opacity-60 transition-opacity hover:opacity-85">
+                        <div className="flex justify-between items-center text-sm sm:text-base">
                           <div className="flex items-center gap-2.5">
-                            <span className="text-[11px] font-bold text-amber-500 bg-amber-950/20 border border-amber-900/30 w-6 h-6 flex items-center justify-center rounded-md shrink-0" title="Shift minimum not met">
+                            <span className="text-xs sm:text-sm font-bold text-amber-400 bg-amber-950/20 border border-amber-900/30 w-7 h-7 flex items-center justify-center rounded-md shrink-0" title="Shift minimum not met">
                               ⏳
                             </span>
                             <span 
-                              className={`w-2.5 h-2.5 rounded-full shrink-0 ${isUber ? 'border border-zinc-500 shadow-[0_0_4px_rgba(255,255,255,0.25)]' : ''}`} 
+                              className={`w-3 h-3 rounded-full shrink-0 ${isUber ? 'border border-zinc-500 shadow-[0_0_4px_rgba(255,255,255,0.25)]' : ''}`} 
                               style={{ backgroundColor: plat.color }} 
                             />
-                            <span className="font-bold text-zinc-400">{plat.platform}</span>
+                            <span className="font-bold text-zinc-200 text-sm sm:text-base">{plat.platform}</span>
                           </div>
                           <div className="text-right">
-                            <span className="text-zinc-400 font-bold">{formatCurrency(plat.hourly, profile)}/hr</span>
-                            <span className="text-[10px] text-amber-500/80 block font-semibold">
+                            <span className="text-zinc-200 font-bold text-sm sm:text-base">{formatCurrency(plat.hourly, profile)}/hr</span>
+                            <span className="text-xs sm:text-sm text-amber-400 block font-semibold">
                               Need {shiftsNeeded} more {shiftsNeeded === 1 ? 'shift' : 'shifts'} to rank
                             </span>
                           </div>
                         </div>
 
                         {/* Horizontal wage comparison bar */}
-                        <div className="w-full bg-zinc-900/40 rounded-full h-2 overflow-hidden">
+                        <div className="w-full bg-zinc-900/40 rounded-full h-2.5 overflow-hidden">
                           <div 
-                            className={`h-2 rounded-full transition-all duration-500 ${isUber ? 'border border-zinc-700 shadow-[0_0_8px_rgba(255,255,255,0.15)] bg-zinc-950' : ''}`} 
+                            className={`h-2.5 rounded-full transition-all duration-500 ${isUber ? 'border border-zinc-700 shadow-[0_0_8px_rgba(255,255,255,0.15)] bg-zinc-950' : ''}`} 
                             style={{ 
                               width: `${barWidth}%`,
                               backgroundColor: plat.color 
@@ -649,8 +648,8 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
           </div>
 
           {strategyInsight && (
-            <div className="bg-zinc-900/10 border border-zinc-900 p-3.5 rounded-xl text-[11px] text-zinc-400 leading-relaxed font-sans mt-3">
-              <span className="font-bold text-zinc-300">{strategyInsight.icon} {strategyInsight.title}:</span> {strategyInsight.text}
+            <div className="bg-zinc-900/10 border border-zinc-900 p-4 rounded-xl text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans mt-3">
+              <span className="font-bold text-zinc-100">{strategyInsight.icon} {strategyInsight.title}:</span> {strategyInsight.text}
             </div>
           )}
         </div>
@@ -667,12 +666,12 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
           <div className="space-y-4">
             <div>
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-emerald-400" />
-                <h4 className="font-display font-semibold text-sm text-zinc-200 uppercase tracking-wider">
+                <Calendar className="w-5 h-5 text-emerald-400" />
+                <h4 className="font-display font-bold text-base sm:text-lg text-zinc-100 uppercase tracking-wider">
                   Weekday Efficiency Planner
                 </h4>
               </div>
-              <p className="text-[11px] text-zinc-500 mt-1">
+              <p className="text-xs sm:text-sm text-zinc-400 mt-1">
                 Tap any day to reveal the absolute ranked efficiency of each platform.
               </p>
             </div>
@@ -700,11 +699,11 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
                     >
                       {/* Left: Day Name & Muted Insufficient Data label next to title */}
                       <div className="flex items-center gap-2.5 shrink-0">
-                        <span className="font-display font-bold text-xs sm:text-sm text-zinc-200 tracking-wide uppercase">
+                        <span className="font-display font-bold text-sm sm:text-base text-zinc-100 tracking-wide uppercase">
                           {item.dayFull}
                         </span>
                         {hasLogs && !topPlat && (
-                          <span className="text-[10px] sm:text-xs text-zinc-500 font-medium flex items-center gap-1 select-none">
+                          <span className="text-xs sm:text-sm text-zinc-400 font-semibold flex items-center gap-1 select-none">
                             ⏳ Insufficient Data
                           </span>
                         )}
@@ -714,12 +713,12 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
                       <div className="flex-1 px-1.5 flex justify-start sm:justify-center">
                         {hasLogs ? (
                           topPlat ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/40 border border-emerald-900/50 text-[9px] sm:text-xs font-semibold text-emerald-400">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/40 border border-emerald-900/50 text-xs sm:text-sm font-bold text-emerald-400">
                               🏆 {topPlat.platform}
                             </span>
                           ) : null
                         ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-zinc-900/40 border border-zinc-900 text-[9px] sm:text-[10px] font-medium text-zinc-500">
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-zinc-900/40 border border-zinc-900 text-xs text-zinc-400 font-semibold">
                             No Data
                           </span>
                         )}
@@ -727,13 +726,13 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
 
                       {/* Right: Avg Net/Hour + Chevron */}
                       <div className="flex items-center gap-2 sm:gap-3">
-                        <span className="font-mono text-xs sm:text-sm font-bold text-zinc-100">
+                        <span className="font-mono text-sm sm:text-base font-bold text-zinc-100">
                           {hasLogs ? `${formatCurrency(item.averageHourly, profile)}/hr` : '--'}
                         </span>
                         {isExpanded ? (
-                          <ChevronUp className="w-3.5 h-3.5 text-zinc-400 transition-transform" />
+                          <ChevronUp className="w-4 h-4 text-zinc-300 transition-transform" />
                         ) : (
-                          <ChevronDown className="w-3.5 h-3.5 text-zinc-500 transition-transform" />
+                          <ChevronDown className="w-4 h-4 text-zinc-300 transition-transform" />
                         )}
                       </div>
                     </button>
@@ -755,30 +754,30 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
                                       const barWidth = (plat.hourly / maxHourly) * 100;
                                       const isUber = plat.color === '#111111';
                                       return (
-                                        <div key={plat.platform} className="space-y-1.5 font-mono">
-                                          <div className="flex justify-between items-center text-[11px] sm:text-xs">
+                                        <div key={plat.platform} className="space-y-2 font-mono">
+                                          <div className="flex justify-between items-center text-sm sm:text-base">
                                             <div className="flex items-center gap-2">
-                                              <span className="text-[9px] font-bold font-mono text-zinc-400 bg-zinc-900 border border-zinc-800/80 px-1.5 py-0.5 rounded-md min-w-[20px] text-center">
+                                              <span className="text-xs sm:text-sm font-bold font-mono text-zinc-200 bg-zinc-900 border border-zinc-800/80 px-2 py-0.5 rounded-md min-w-[24px] text-center">
                                                 #{idx + 1}
                                               </span>
                                               <span 
-                                                className={`w-2 h-2 rounded-full shrink-0 ${isUber ? 'border border-zinc-500 shadow-[0_0_4px_rgba(255,255,255,0.25)]' : ''}`} 
+                                                className={`w-2.5 h-2.5 rounded-full shrink-0 ${isUber ? 'border border-zinc-500 shadow-[0_0_4px_rgba(255,255,255,0.25)]' : ''}`} 
                                                 style={{ backgroundColor: plat.color }} 
                                               />
-                                              <span className="font-sans font-bold text-zinc-300">{plat.platform}</span>
-                                              <span className="text-[9px] text-zinc-500 font-normal">({plat.shiftsCount} shifts)</span>
+                                              <span className="font-sans font-bold text-zinc-100 text-sm sm:text-base">{plat.platform}</span>
+                                              <span className="text-xs sm:text-sm text-zinc-400 font-medium">({plat.shiftsCount} shifts)</span>
                                             </div>
                                             <div className="text-right">
-                                              <span className="text-emerald-400 font-extrabold">
+                                              <span className="text-emerald-400 font-extrabold text-sm sm:text-base">
                                                 {formatCurrency(plat.hourly, profile)}/hr
                                               </span>
                                             </div>
                                           </div>
 
                                           {/* Horizontal relative progress bar */}
-                                          <div className="w-full bg-zinc-900/60 rounded-full h-1.5 sm:h-2 overflow-hidden">
+                                          <div className="w-full bg-zinc-900/60 rounded-full h-2 sm:h-2.5 overflow-hidden">
                                             <div 
-                                              className={`h-1.5 sm:h-2 rounded-full transition-all duration-500 ${isUber ? 'border border-zinc-700 shadow-[0_0_8px_rgba(255,255,255,0.15)] bg-zinc-950' : ''}`} 
+                                              className={`h-2 sm:h-2.5 rounded-full transition-all duration-500 ${isUber ? 'border border-zinc-700 shadow-[0_0_8px_rgba(255,255,255,0.15)] bg-zinc-950' : ''}`} 
                                               style={{ 
                                                 width: `${barWidth}%`,
                                                 backgroundColor: plat.color 
@@ -800,7 +799,7 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
                                 {item.insufficientPlatformsList.length > 0 && (
                                   <div className="space-y-3">
                                     {item.rankedPlatformsList.length === 0 && (
-                                      <span className="text-[9px] font-extrabold text-zinc-500 uppercase tracking-wider block mb-1">
+                                      <span className="text-xs sm:text-sm font-bold text-zinc-400 uppercase tracking-wider block mb-1.5">
                                         Insufficient Data (Less than 3 shifts)
                                       </span>
                                     )}
@@ -809,29 +808,29 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
                                       const shiftsNeeded = 3 - plat.shiftsCount;
                                       const isUber = plat.color === '#111111';
                                       return (
-                                        <div key={plat.platform} className="space-y-1.5 font-mono opacity-60">
-                                          <div className="flex justify-between items-center text-[11px] sm:text-xs">
+                                        <div key={plat.platform} className="space-y-2 font-mono opacity-60">
+                                          <div className="flex justify-between items-center text-sm sm:text-base">
                                             <div className="flex items-center gap-2">
                                               <span 
-                                                className={`w-2 h-2 rounded-full shrink-0 ${isUber ? 'border border-zinc-500 shadow-[0_0_4px_rgba(255,255,255,0.25)]' : ''}`} 
+                                                className={`w-2.5 h-2.5 rounded-full shrink-0 ${isUber ? 'border border-zinc-500 shadow-[0_0_4px_rgba(255,255,255,0.25)]' : ''}`} 
                                                 style={{ backgroundColor: plat.color }} 
                                               />
-                                              <span className="font-sans font-bold text-zinc-400">{plat.platform}</span>
+                                              <span className="font-sans font-bold text-zinc-200 text-sm sm:text-base">{plat.platform}</span>
                                             </div>
                                             <div className="text-right">
-                                              <span className="text-zinc-400 font-bold">
+                                              <span className="text-zinc-200 font-bold text-sm sm:text-base">
                                                 {formatCurrency(plat.hourly, profile)}/hr
                                               </span>
-                                              <span className="text-[9px] text-amber-500/80 block font-semibold font-sans">
+                                              <span className="text-xs sm:text-sm text-amber-400 block font-semibold font-sans">
                                                 Need {shiftsNeeded} more {shiftsNeeded === 1 ? 'shift' : 'shifts'} to rank
                                               </span>
                                             </div>
                                           </div>
 
                                           {/* Horizontal relative progress bar */}
-                                          <div className="w-full bg-zinc-900/40 rounded-full h-1 overflow-hidden">
+                                          <div className="w-full bg-zinc-900/40 rounded-full h-2 overflow-hidden">
                                             <div 
-                                              className={`h-1 rounded-full transition-all duration-500 ${isUber ? 'border border-zinc-700 shadow-[0_0_8px_rgba(255,255,255,0.15)] bg-zinc-950' : ''}`} 
+                                              className={`h-2 rounded-full transition-all duration-500 ${isUber ? 'border border-zinc-700 shadow-[0_0_8px_rgba(255,255,255,0.15)] bg-zinc-950' : ''}`} 
                                               style={{ 
                                                 width: `${barWidth}%`,
                                                 backgroundColor: plat.color 
@@ -848,9 +847,9 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
                           })()
                         ) : (
                           <div className="text-center py-6 px-4 border border-zinc-900/50 border-dashed rounded-xl">
-                            <Calendar className="w-5 h-5 text-zinc-600 mx-auto mb-1.5" />
-                            <h5 className="text-[11px] font-bold text-zinc-400">No Shift Logs on {item.dayFull}</h5>
-                            <p className="text-[10px] text-zinc-500 mt-1 max-w-[220px] mx-auto leading-relaxed">
+                            <Calendar className="w-6 h-6 text-zinc-500 mx-auto mb-1.5" />
+                            <h5 className="text-sm sm:text-base font-bold text-zinc-300">No Shift Logs on {item.dayFull}</h5>
+                            <p className="text-xs sm:text-sm text-zinc-400 mt-1 max-w-[280px] mx-auto leading-relaxed">
                               Log driving sessions on this day of the week to unlock predictive efficiency mapping.
                             </p>
                           </div>
@@ -863,9 +862,9 @@ export default function Stats({ logs, distanceUnit, profile }: StatsProps) {
             </div>
           </div>
 
-          <div className="bg-zinc-900/20 border border-zinc-900/60 p-3 rounded-xl text-[10px] text-zinc-400 leading-tight font-sans mt-2">
+          <div className="bg-zinc-900/20 border border-zinc-900/60 p-3.5 rounded-xl text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans mt-2">
             {weekdayPlanningTip.hasData ? '🎯' : '💡'}{' '}
-            <span className="font-semibold text-zinc-200">
+            <span className="font-bold text-zinc-100">
               {weekdayPlanningTip.hasData ? 'Pro-Tip' : 'Planning tip'}:
             </span>{' '}
             {weekdayPlanningTip.text}

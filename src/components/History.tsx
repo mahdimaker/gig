@@ -276,19 +276,19 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                         />
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-zinc-200 text-sm md:text-base">
+                            <span className="font-semibold text-zinc-100 text-sm md:text-base">
                               {log.platform} Shift
                             </span>
-                            <span className="text-[10px] text-zinc-500 border border-zinc-800 px-2 py-0.5 rounded font-mono">
+                            <span className="text-xs text-zinc-300 border border-zinc-800 bg-zinc-900 px-2.5 py-0.5 rounded font-mono font-medium">
                               {log.date}
                             </span>
                           </div>
                           {log.notes ? (
-                            <p className="text-xs text-zinc-500 line-clamp-1 mt-0.5 max-w-md">
+                            <p className="text-sm text-zinc-400 line-clamp-1 mt-0.5 max-w-md">
                               {log.notes}
                             </p>
                           ) : (
-                            <p className="text-xs text-zinc-600 mt-0.5">
+                            <p className="text-sm text-zinc-400 mt-0.5">
                               Logged with {log.expensesList.length} external expense item(s)
                             </p>
                           )}
@@ -296,41 +296,41 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                       </div>
 
                       {/* Mobile Chevron */}
-                      <div className="md:hidden text-zinc-500 bg-zinc-900/50 p-1.5 rounded-lg border border-zinc-800 shrink-0">
-                        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-emerald-400' : ''}`} />
+                      <div className="md:hidden text-zinc-400 bg-zinc-900/50 p-1.5 rounded-lg border border-zinc-800 shrink-0">
+                        <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-emerald-400' : ''}`} />
                       </div>
                     </div>
 
                     {/* Numeric breakdown quick view */}
-                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-xs md:text-sm w-full md:w-auto justify-between md:justify-end">
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-sm w-full md:w-auto justify-between md:justify-end">
                       
                       <div className="text-right">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider block font-sans">Gross Income</span>
-                        <span className="font-bold text-zinc-300">{formatCurrency(log.grossRevenue, profile)}</span>
+                        <span className="text-xs text-zinc-400 uppercase tracking-wider block font-sans font-bold">Gross Income</span>
+                        <span className="font-bold text-zinc-200">{formatCurrency(log.grossRevenue, profile)}</span>
                       </div>
 
                       <div className="text-right">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider block font-sans">Duration</span>
-                        <span className="font-bold text-zinc-300">{log.hoursOnline} hrs</span>
+                        <span className="text-xs text-zinc-400 uppercase tracking-wider block font-sans font-bold">Duration</span>
+                        <span className="font-bold text-zinc-200">{log.hoursOnline} hrs</span>
                       </div>
 
                       <div className="text-right">
-                        <span className="text-[10px] text-emerald-500 uppercase tracking-wider block font-semibold font-sans">Real Net Profit</span>
+                        <span className="text-xs text-emerald-400 uppercase tracking-wider block font-bold font-sans">Real Net Profit</span>
                         <span className="font-bold text-emerald-400">{formatCurrency(log.netProfit, profile)}</span>
                       </div>
 
                       <div className="text-right border-l border-zinc-900/60 pl-4">
-                        <span className="text-[10px] text-emerald-500 uppercase tracking-wider block font-semibold font-sans">Hourly Rate</span>
+                        <span className="text-xs text-emerald-400 uppercase tracking-wider block font-bold font-sans">Hourly Rate</span>
                         <span className="font-extrabold text-emerald-400">{formatCurrency(log.hourlyWage, profile)}/hr</span>
                       </div>
 
                       {/* Expand Chevron / Indicators */}
                       <div className="hidden md:flex items-center gap-2 pl-4 border-l border-zinc-900/60">
-                        <span className="text-xs text-zinc-400 font-sans font-medium transition-colors hover:text-zinc-200">
+                        <span className="text-sm text-zinc-300 font-sans font-semibold transition-colors hover:text-zinc-100">
                           {isExpanded ? 'Collapse' : 'Details'}
                         </span>
-                        <div className={`p-1.5 rounded-lg border transition-all duration-300 ${isExpanded ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-400' : 'bg-zinc-900/40 border-zinc-800/80 text-zinc-500'}`}>
-                          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                        <div className={`p-1.5 rounded-lg border transition-all duration-300 ${isExpanded ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-400' : 'bg-zinc-900/40 border-zinc-800/80 text-zinc-400'}`}>
+                          <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
                         </div>
                       </div>
 
@@ -354,7 +354,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                             
                             {/* Left: Progress/Metrics Breakdown */}
                             <div className="md:col-span-8 space-y-4">
-                              <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider font-sans">
+                              <h4 className="text-sm font-bold text-zinc-300 uppercase tracking-wider font-sans">
                                 Realistic Cost Audit Report
                               </h4>
 
@@ -362,16 +362,16 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                                 
                                 {/* Fuel Cost line */}
                                 <div className="space-y-1">
-                                  <div className="flex justify-between text-xs">
-                                    <span className="text-zinc-500 flex items-center gap-1">
-                                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-zinc-400 flex items-center gap-1.5 font-medium">
+                                      <span className="w-2 h-2 rounded-full bg-amber-500"></span>
                                       Fuel cost for shift distance ({log.distance} {distanceUnit})
                                     </span>
                                     <span className="text-amber-400 font-bold">-{formatCurrency(log.fuelCost, profile)}</span>
                                   </div>
-                                  <div className="w-full bg-zinc-900 rounded-full h-1 overflow-hidden">
+                                  <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
                                     <div 
-                                      className="bg-amber-500 h-1 rounded-full" 
+                                      className="bg-amber-500 h-1.5 rounded-full" 
                                       style={{ width: `${(log.fuelCost / log.grossRevenue) * 100}%` }}
                                     ></div>
                                   </div>
@@ -379,16 +379,16 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
 
                                 {/* Depreciation cost line */}
                                 <div className="space-y-1">
-                                  <div className="flex justify-between text-xs">
-                                    <span className="text-zinc-500 flex items-center gap-1">
-                                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-zinc-400 flex items-center gap-1.5 font-medium">
+                                      <span className="w-2 h-2 rounded-full bg-orange-500"></span>
                                       Depreciation & wear (tires, oil, parts)
                                     </span>
                                     <span className="text-orange-400 font-bold">-{formatCurrency(log.depreciationCost, profile)}</span>
                                   </div>
-                                  <div className="w-full bg-zinc-900 rounded-full h-1 overflow-hidden">
+                                  <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
                                     <div 
-                                      className="bg-orange-500 h-1 rounded-full" 
+                                      className="bg-orange-500 h-1.5 rounded-full" 
                                       style={{ width: `${(log.depreciationCost / log.grossRevenue) * 100}%` }}
                                     ></div>
                                   </div>
@@ -396,16 +396,16 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
 
                                 {/* Logged Expenses list */}
                                 <div className="space-y-1">
-                                  <div className="flex justify-between text-xs">
-                                    <span className="text-zinc-500 flex items-center gap-1">
-                                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-zinc-400 flex items-center gap-1.5 font-medium">
+                                      <span className="w-2 h-2 rounded-full bg-rose-500"></span>
                                       Extra road expenses logged
                                     </span>
                                     <span className="text-rose-400 font-bold">-{formatCurrency(log.loggedExpenses, profile)}</span>
                                   </div>
-                                  <div className="w-full bg-zinc-900 rounded-full h-1 overflow-hidden">
+                                  <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
                                     <div 
-                                      className="bg-rose-500 h-1 rounded-full" 
+                                      className="bg-rose-500 h-1.5 rounded-full" 
                                       style={{ width: `${(log.loggedExpenses / log.grossRevenue) * 100}%` }}
                                     ></div>
                                   </div>
@@ -416,8 +416,8 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                               {/* Shift notes */}
                               {log.notes && (
                                 <div className="mt-4 bg-zinc-900/30 border border-zinc-900/80 p-3.5 rounded-xl font-sans">
-                                  <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">Driver Log Notes</p>
-                                  <p className="text-xs text-zinc-300 mt-1 leading-relaxed">
+                                  <p className="text-xs text-zinc-400 uppercase tracking-wider font-bold">Driver Log Notes</p>
+                                  <p className="text-sm text-zinc-200 mt-1 leading-relaxed">
                                     {log.notes}
                                   </p>
                                 </div>
@@ -428,21 +428,21 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                             <div className="md:col-span-4 flex flex-col justify-between border-t md:border-t-0 md:border-l border-zinc-900 pt-4 md:pt-0 md:pl-5">
                               
                               <div className="space-y-3">
-                                <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider font-sans">
+                                <h4 className="text-sm font-bold text-zinc-300 uppercase tracking-wider font-sans">
                                   Cost Slices
                                 </h4>
                                 
-                                <div className="space-y-2 text-xs">
+                                <div className="space-y-2 text-sm">
                                   <div className="flex justify-between">
-                                    <span className="text-zinc-500">Gross Income:</span>
-                                    <span className="text-zinc-200 font-bold">{formatCurrency(log.grossRevenue, profile)}</span>
+                                    <span className="text-zinc-400">Gross Income:</span>
+                                    <span className="text-zinc-100 font-bold">{formatCurrency(log.grossRevenue, profile)}</span>
                                   </div>
                                   <div className="flex justify-between border-b border-zinc-900 pb-2">
-                                    <span className="text-zinc-500">Total Costs:</span>
+                                    <span className="text-zinc-400">Total Costs:</span>
                                     <span className="text-rose-400 font-bold">-{formatCurrency(totalExpenses, profile)}</span>
                                   </div>
-                                  <div className="flex justify-between pt-1 font-semibold text-sm">
-                                    <span className="text-emerald-500 font-sans">Real Net Profit:</span>
+                                  <div className="flex justify-between pt-1 font-bold text-sm">
+                                    <span className="text-emerald-400 font-sans">Real Net Profit:</span>
                                     <span className="text-emerald-400">{formatCurrency(log.netProfit, profile)}</span>
                                   </div>
                                 </div>
@@ -450,12 +450,12 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                                 {/* Attached expenses details list */}
                                 {log.expensesList.length > 0 && (
                                   <div className="pt-2">
-                                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Receipt Log:</p>
+                                    <p className="text-xs text-zinc-400 font-bold uppercase tracking-wider mb-1">Receipt Log:</p>
                                     <div className="space-y-1">
                                       {log.expensesList.map(item => (
-                                        <div key={item.id} className="text-[11px] text-zinc-400 flex justify-between">
+                                        <div key={item.id} className="text-sm text-zinc-300 flex justify-between">
                                           <span>• {item.category}</span>
-                                          <span className="text-rose-400">{formatCurrency(item.amount, profile)}</span>
+                                          <span className="text-rose-400 font-bold">{formatCurrency(item.amount, profile)}</span>
                                         </div>
                                       ))}
                                     </div>
@@ -468,10 +468,10 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                                 <button
                                   type="button"
                                   onClick={() => onDeleteLog(log.id)}
-                                  className="w-full bg-rose-950/20 hover:bg-rose-950/50 text-rose-400 border border-rose-900/50 hover:border-rose-900 py-2 px-3 rounded-xl text-xs font-semibold font-sans flex items-center justify-center gap-1.5 transition-colors"
+                                  className="w-full bg-rose-950/20 hover:bg-rose-950/50 text-rose-400 border border-rose-900/50 hover:border-rose-900 py-2.5 px-3 rounded-xl text-sm font-bold font-sans flex items-center justify-center gap-2 transition-colors cursor-pointer"
                                   id={`delete-shift-button-${log.id}`}
                                 >
-                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <Trash2 className="w-4 h-4" />
                                   Delete Log Entry
                                 </button>
                               </div>

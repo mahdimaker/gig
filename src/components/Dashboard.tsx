@@ -23,12 +23,14 @@ import {
   ChevronDown,
   FileText,
   Activity,
-  Loader2
+  Loader2,
+  Sliders
 } from 'lucide-react';
 import { VehicleProfile, ShiftLog, ExpenseItem, PLATFORMS } from '../types';
 import { computeShiftMetrics, formatCurrency } from '../utils';
 import { motion, AnimatePresence } from 'motion/react';
 import AdSlot from './AdSlot';
+import RangeSliderModal, { SliderModalType } from './RangeSliderModal';
 
 interface DashboardProps {
   profile: VehicleProfile;
@@ -86,6 +88,22 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
 
   // Active form tab on mobile ('entry' | 'simulator')
   const [activeFormTab, setActiveFormTab] = useState<'entry' | 'simulator'>('entry');
+
+  // Interactive Range Slider Modal state ('income' | 'distance' | 'time' | null)
+  const [sliderModalType, setSliderModalType] = useState<SliderModalType>(null);
+
+  const handleConfirmIncome = (val: number) => {
+    setGrossRevenueInput(val > 0 ? val.toFixed(2) : '');
+  };
+
+  const handleConfirmDistance = (val: number) => {
+    setDistanceInput(val > 0 ? val.toFixed(1) : '');
+  };
+
+  const handleConfirmTime = (hrs: number, mins: number) => {
+    setHoursPart(hrs > 0 ? hrs.toString() : '');
+    setMinutesPart(mins > 0 ? mins.toString() : '');
+  };
 
   // Collapsible accordions state for layout density
   const [isExpensesExpanded, setIsExpensesExpanded] = useState<boolean>(false);
@@ -357,43 +375,43 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                     <h2 className="font-display font-semibold text-zinc-100 text-lg">
                       {profile.year} {profile.make} {profile.model}
                     </h2>
-                    <span className="text-[10px] bg-zinc-800 text-zinc-400 uppercase tracking-wider px-2 py-0.5 rounded-full font-mono">
+                    <span className="text-xs bg-zinc-800 text-zinc-300 uppercase tracking-wider px-2.5 py-0.5 rounded-full font-mono font-semibold">
                       Active
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-400 mt-0.5">
+                  <p className="text-sm text-zinc-300 mt-0.5">
                     Continuous real-time cost calculation engine configured
                   </p>
                 </div>
               </div>
               <button 
                 onClick={onNavigateToSettings}
-                className="text-xs text-emerald-400 hover:text-emerald-300 font-medium flex items-center gap-1 transition-colors bg-emerald-950/40 border border-emerald-900/50 hover:border-emerald-800/60 px-3 py-1.5 rounded-lg"
+                className="text-sm text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 transition-colors bg-emerald-950/40 border border-emerald-900/50 hover:border-emerald-800/60 px-3 py-1.5 rounded-lg"
                 id="edit-vehicle-button"
               >
                 Change Rates
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
 
             {/* Configured rates breakdown */}
             <div className="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-zinc-900 font-mono">
               <div className="bg-zinc-900/30 border border-zinc-900/50 p-2.5 rounded-xl">
-                <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Avg Consumption</p>
-                <p className="text-sm font-semibold text-zinc-200 mt-1">
-                  {profile.fuelConsumption} <span className="text-xs text-zinc-500">{profile.distanceUnit === 'miles' ? (profile.measurementSystem === 'uk' ? 'UK MPG' : 'MPG') : 'L/100km'}</span>
+                <p className="text-xs uppercase font-semibold text-zinc-400 tracking-wider">Avg Consumption</p>
+                <p className="text-base font-semibold text-zinc-200 mt-1">
+                  {profile.fuelConsumption} <span className="text-sm text-zinc-400">{profile.distanceUnit === 'miles' ? (profile.measurementSystem === 'uk' ? 'UK MPG' : 'MPG') : 'L/100km'}</span>
                 </p>
               </div>
               <div className="bg-zinc-900/30 border border-zinc-900/50 p-2.5 rounded-xl">
-                <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Fuel Cost rate</p>
-                <p className="text-sm font-semibold text-zinc-200 mt-1">
-                  {formatCurrency(profile.fuelPrice, profile)} <span className="text-xs text-zinc-500">/{profile.fuelUnit === 'gallons' ? 'gal' : 'L'}</span>
+                <p className="text-xs uppercase font-semibold text-zinc-400 tracking-wider">Fuel Cost rate</p>
+                <p className="text-base font-semibold text-zinc-200 mt-1">
+                  {formatCurrency(profile.fuelPrice, profile)} <span className="text-sm text-zinc-400">/{profile.fuelUnit === 'gallons' ? 'gal' : 'L'}</span>
                 </p>
               </div>
               <div className="bg-zinc-900/30 border border-zinc-900/50 p-2.5 rounded-xl">
-                <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Depreciation</p>
-                <p className="text-sm font-semibold text-zinc-200 mt-1">
-                  {formatCurrency(profile.depreciationRate, profile)} <span className="text-xs text-zinc-500">/{profile.distanceUnit === 'miles' ? 'mi' : 'km'}</span>
+                <p className="text-xs uppercase font-semibold text-zinc-400 tracking-wider">Depreciation</p>
+                <p className="text-base font-semibold text-zinc-200 mt-1">
+                  {formatCurrency(profile.depreciationRate, profile)} <span className="text-sm text-zinc-400">/{profile.distanceUnit === 'miles' ? 'mi' : 'km'}</span>
                 </p>
               </div>
             </div>
@@ -408,22 +426,25 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
               
               {/* Quick Platform Badges with brand identity colors */}
               <div className="space-y-1.5">
-                <span className="block text-xs sm:text-sm font-black text-zinc-400 uppercase tracking-wider select-none">
+                <span className="block text-sm font-bold text-zinc-300 uppercase tracking-wider select-none">
                   Quick Select Platform
                 </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {PLATFORMS.map((p) => {
+                <div className="grid grid-cols-6 gap-2">
+                  {PLATFORMS.map((p, index) => {
                     const isSelected = selectedPlatform === p.id;
                     const activeClasses = getPlatformActiveClasses(p.id);
+                    // First 4 items (indices 0, 1, 2, 3) get col-span-3 (2 per row in a 6-col grid)
+                    // Remaining 3 items (indices 4, 5, 6) get col-span-2 (3 per row in a 6-col grid)
+                    const colSpanClass = index < 4 ? 'col-span-3' : 'col-span-2';
                     return (
                       <button
                         type="button"
                         key={p.id}
                         onClick={() => setSelectedPlatform(p.id)}
-                        className={`text-xs px-3 py-2 rounded-lg border font-medium transition-all duration-200 cursor-pointer active:scale-95 select-none ${
+                        className={`${colSpanClass} text-xs sm:text-sm px-1.5 sm:px-3 py-2.5 rounded-lg border font-medium transition-all duration-200 cursor-pointer active:scale-95 select-none text-center flex items-center justify-center truncate ${
                           isSelected
                             ? activeClasses
-                            : 'bg-zinc-900/30 border-zinc-800/80 text-zinc-400 hover:border-zinc-750 hover:text-zinc-200'
+                            : 'bg-zinc-900/30 border-zinc-800/80 text-zinc-300 hover:border-zinc-750 hover:text-zinc-100'
                         }`}
                       >
                         {p.id}
@@ -437,38 +458,41 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
               <div className="grid grid-cols-1 gap-4">
                 
                 {/* 1. Gross Revenue with Dedicated Row for Touch-Friendly Quick Add buttons */}
-                <div className="bg-zinc-900/40 border border-zinc-900/90 py-4 px-4.5 rounded-xl relative focus-within:border-emerald-500/50 transition-all">
+                <div 
+                  onClick={() => setSliderModalType('income')}
+                  className="bg-zinc-900/40 border border-zinc-900/90 hover:border-emerald-500/50 py-4 px-4.5 rounded-xl relative transition-all cursor-pointer group select-none"
+                >
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-xs sm:text-sm font-black text-zinc-300 uppercase tracking-wider flex items-center gap-1 select-none">
-                      <DollarSign className="w-3.5 h-3.5 text-emerald-400" /> Gross Income
+                    <label className="text-sm font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5 cursor-pointer">
+                      <DollarSign className="w-4 h-4 text-emerald-400" /> Gross Income
                     </label>
-                    <span className="text-xs text-zinc-500 font-semibold font-sans select-none">What driver app shows</span>
+                    <div className="flex items-center gap-1 text-sm font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-900/60 px-2.5 py-0.5 rounded-md group-hover:bg-emerald-900/40 transition-colors">
+                      <Sliders className="w-3.5 h-3.5" />
+                      <span>Slider</span>
+                    </div>
                   </div>
                   
-                  <div className="relative mt-1">
-                    <span className="absolute left-1 top-1/2 -translate-y-1/2 text-3xl font-black text-zinc-500 font-mono select-none">
+                  <div className="relative mt-1 flex items-center">
+                    <span className="text-3xl font-black text-zinc-500 font-mono select-none mr-1">
                       {profile.measurementSystem === 'uk' ? '£' : profile.measurementSystem === 'metric' ? '€' : '$'}
                     </span>
                     <input
-                      type="number"
-                      step="0.01"
-                      min="0"
+                      type="text"
+                      readOnly
                       placeholder="0.00"
                       value={grossRevenueInput}
-                      onChange={(e) => setGrossRevenueInput(e.target.value)}
-                      required
-                      className="w-full bg-transparent border-none text-zinc-100 pl-6 pr-1 text-3xl font-black font-mono focus:outline-none focus:ring-0 py-2.5"
+                      className="w-full bg-transparent border-none text-zinc-100 text-3xl font-black font-mono focus:outline-none cursor-pointer py-2.5"
                     />
                   </div>
 
                   {/* Quick Add Buttons on a dedicated row beneath the large value input */}
-                  <div className="flex gap-2.5 mt-2 pt-1 border-t border-zinc-900/40">
+                  <div className="flex gap-2.5 mt-2 pt-1 border-t border-zinc-900/40" onClick={(e) => e.stopPropagation()}>
                     {[5, 10, 20].map((amt) => (
                       <button
                         type="button"
                         key={amt}
                         onClick={() => handleAddGross(amt)}
-                        className="flex-1 text-center text-xs font-mono font-black bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-750 text-emerald-400 hover:text-emerald-300 py-2.5 px-3 rounded-lg border border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer active:scale-95 select-none"
+                        className="flex-1 text-center text-sm font-mono font-bold bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-750 text-emerald-400 hover:text-emerald-300 py-2.5 px-3 rounded-lg border border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer active:scale-95 select-none"
                       >
                         +{profile.measurementSystem === 'uk' ? '£' : profile.measurementSystem === 'metric' ? '€' : '$'}{amt}
                       </button>
@@ -477,49 +501,57 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                 </div>
 
                 {/* 2. Shift Distance */}
-                <div className="bg-zinc-900/40 border border-zinc-900/90 py-4 px-4.5 rounded-xl relative focus-within:border-emerald-500/50 transition-all">
+                <div 
+                  onClick={() => setSliderModalType('distance')}
+                  className="bg-zinc-900/40 border border-zinc-900/90 hover:border-amber-500/50 py-4 px-4.5 rounded-xl relative transition-all cursor-pointer group select-none"
+                >
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-xs sm:text-sm font-black text-zinc-300 uppercase tracking-wider flex items-center gap-1 select-none">
-                      <Milestone className="w-3.5 h-3.5 text-amber-500" /> Distance
+                    <label className="text-sm font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5 cursor-pointer">
+                      <Milestone className="w-4 h-4 text-amber-500" /> Distance
                     </label>
-                    <span className="text-xs text-zinc-500 font-semibold font-sans select-none">Odometer or trip miles</span>
+                    <div className="flex items-center gap-1 text-sm font-bold text-amber-400 bg-amber-950/60 border border-amber-900/60 px-2.5 py-0.5 rounded-md group-hover:bg-amber-900/40 transition-colors">
+                      <Sliders className="w-3.5 h-3.5" />
+                      <span>Slider</span>
+                    </div>
                   </div>
-                  <div className="relative mt-1">
+                  <div className="relative mt-1 flex items-center justify-between">
                     <input
-                      type="number"
-                      step="0.1"
-                      min="0"
+                      type="text"
+                      readOnly
                       placeholder="0.0"
                       value={distanceInput}
-                      onChange={(e) => setDistanceInput(e.target.value)}
-                      required
-                      className="w-full bg-transparent border-none text-zinc-100 pr-12 text-3xl font-black font-mono focus:outline-none focus:ring-0 py-2.5"
+                      className="w-full bg-transparent border-none text-zinc-100 text-3xl font-black font-mono focus:outline-none cursor-pointer py-2.5"
                     />
-                    <span className="absolute right-1 top-1/2 -translate-y-1/2 text-base font-bold text-zinc-500 font-mono">
+                    <span className="text-base font-bold text-zinc-500 font-mono shrink-0 ml-2">
                       {profile.distanceUnit}
                     </span>
                   </div>
                 </div>
 
                 {/* 3. Hours Online */}
-                <div className="bg-zinc-900/40 border border-zinc-900/90 py-4 px-4.5 rounded-xl relative focus-within:border-emerald-500/50 transition-all">
+                <div 
+                  onClick={() => setSliderModalType('time')}
+                  className="bg-zinc-900/40 border border-zinc-900/90 hover:border-blue-500/50 py-4 px-4.5 rounded-xl relative transition-all cursor-pointer group select-none"
+                >
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-xs sm:text-sm font-black text-zinc-300 uppercase tracking-wider flex items-center gap-1 select-none">
-                      <Clock className="w-3.5 h-3.5 text-blue-400" /> Time Online
+                    <label className="text-sm font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5 cursor-pointer">
+                      <Clock className="w-4 h-4 text-blue-400" /> Time Online
                     </label>
-                    <span className="text-xs text-zinc-500 font-semibold font-sans select-none">Total duration of shift</span>
+                    <div className="flex items-center gap-1 text-sm font-bold text-blue-400 bg-blue-950/60 border border-blue-900/60 px-2.5 py-0.5 rounded-md group-hover:bg-blue-900/40 transition-colors">
+                      <Sliders className="w-3.5 h-3.5" />
+                      <span>Slider</span>
+                    </div>
                   </div>
                   
                   {/* Dual Input Slot: Hours & Minutes */}
                   <div className="flex items-center gap-2 mt-1">
                     <div className="relative flex-1">
                       <input
-                        type="number"
-                        min="0"
+                        type="text"
+                        readOnly
                         placeholder="0"
                         value={hoursPart}
-                        onChange={(e) => setHoursPart(e.target.value)}
-                        className="w-full bg-transparent border-none text-zinc-100 pr-8 text-3xl font-black font-mono focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none py-2.5"
+                        className="w-full bg-transparent border-none text-zinc-100 pr-8 text-3xl font-black font-mono focus:outline-none cursor-pointer py-2.5"
                       />
                       <span className="absolute right-1 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-500 font-mono">hrs</span>
                     </div>
@@ -528,18 +560,11 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                     
                     <div className="relative flex-1">
                       <input
-                        type="number"
-                        min="0"
-                        max="59"
+                        type="text"
+                        readOnly
                         placeholder="00"
                         value={minutesPart}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === '' || (parseInt(val, 10) >= 0 && parseInt(val, 10) < 60)) {
-                            setMinutesPart(val);
-                          }
-                        }}
-                        className="w-full bg-transparent border-none text-zinc-100 pr-8 text-3xl font-black font-mono focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none py-2.5"
+                        className="w-full bg-transparent border-none text-zinc-100 pr-8 text-3xl font-black font-mono focus:outline-none cursor-pointer py-2.5"
                       />
                       <span className="absolute right-1 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-500 font-mono">min</span>
                     </div>
@@ -556,20 +581,20 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                   className="w-full flex items-center justify-between p-3.5 text-left select-none cursor-pointer hover:bg-zinc-900/30 transition-colors"
                 >
                   <div className="flex items-center gap-2.5">
-                    <Coins className="w-4 h-4 text-amber-500" />
+                    <Coins className="w-4.5 h-4.5 text-amber-500" />
                     <div>
-                      <h3 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">
+                      <h3 className="text-sm font-bold text-zinc-200 uppercase tracking-wider">
                         Quick-Log Road Expenses
                       </h3>
-                      <p className="text-[10px] text-zinc-500">
+                      <p className="text-sm text-zinc-400">
                         Tap to instantly attach tolls, wash, or parking
                         {shiftExpenses.length > 0 && ` | ${shiftExpenses.length} ${shiftExpenses.length === 1 ? 'item' : 'items'} logged`}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 text-zinc-500">
+                  <div className="flex items-center gap-2 text-zinc-400">
                     {shiftExpenses.length > 0 && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse" />
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse" />
                     )}
                     {isExpensesExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </div>
@@ -583,8 +608,8 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                         onClick={() => handleQuickAddExpense('Tolls', profile.expenseDefaults?.tolls ?? 5.00)}
                         className="bg-zinc-900/30 hover:bg-zinc-900/70 p-2.5 rounded-xl flex flex-col items-center gap-1 text-center group transition-all cursor-pointer active:scale-95 border-none"
                       >
-                        <Coins className="w-4 h-4 text-amber-500 group-hover:scale-110 transition-transform" />
-                        <span className="text-[10px] text-zinc-300 font-medium mt-1">
+                        <Coins className="w-4.5 h-4.5 text-amber-500 group-hover:scale-110 transition-transform" />
+                        <span className="text-sm text-zinc-200 font-medium mt-1">
                           Tolls ({formatCurrency(profile.expenseDefaults?.tolls ?? 5.00, profile)})
                         </span>
                       </button>
@@ -594,8 +619,8 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                         onClick={() => handleQuickAddExpense('Car Wash', profile.expenseDefaults?.carWash ?? 14.00)}
                         className="bg-zinc-900/30 hover:bg-zinc-900/70 p-2.5 rounded-xl flex flex-col items-center gap-1 text-center group transition-all cursor-pointer active:scale-95 border-none"
                       >
-                        <Sparkles className="w-4 h-4 text-sky-400 group-hover:scale-110 transition-transform" />
-                        <span className="text-[10px] text-zinc-300 font-medium mt-1">
+                        <Sparkles className="w-4.5 h-4.5 text-sky-400 group-hover:scale-110 transition-transform" />
+                        <span className="text-sm text-zinc-200 font-medium mt-1">
                           Wash ({formatCurrency(profile.expenseDefaults?.carWash ?? 14.00, profile)})
                         </span>
                       </button>
@@ -605,8 +630,8 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                         onClick={() => handleQuickAddExpense('Parking', profile.expenseDefaults?.parking ?? 4.00)}
                         className="bg-zinc-900/30 hover:bg-zinc-900/70 p-2.5 rounded-xl flex flex-col items-center gap-1 text-center group transition-all cursor-pointer active:scale-95 border-none"
                       >
-                        <SquareParking className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
-                        <span className="text-[10px] text-zinc-300 font-medium mt-1">
+                        <SquareParking className="w-4.5 h-4.5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                        <span className="text-sm text-zinc-200 font-medium mt-1">
                           Parking ({formatCurrency(profile.expenseDefaults?.parking ?? 4.00, profile)})
                         </span>
                       </button>
@@ -624,8 +649,8 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                             onClick={() => handleQuickAddExpense(btn.category, btn.amount, btn.label)}
                             className="bg-zinc-900/30 hover:bg-zinc-900/70 p-2.5 rounded-xl flex flex-col items-center gap-1 text-center group transition-all cursor-pointer active:scale-95 border-none"
                           >
-                            <IconComponent className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
-                            <span className="text-[10px] text-zinc-300 font-medium mt-1">
+                            <IconComponent className="w-4.5 h-4.5 text-purple-400 group-hover:scale-110 transition-transform" />
+                            <span className="text-sm text-zinc-200 font-medium mt-1">
                               {btn.label} ({formatCurrency(btn.amount, profile)})
                             </span>
                           </button>
@@ -637,8 +662,8 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                         onClick={() => handleQuickAddExpense('Fines')}
                         className="bg-zinc-900/30 hover:bg-zinc-900/70 p-2.5 rounded-xl flex flex-col items-center gap-1 text-center group transition-all cursor-pointer active:scale-95 border-none"
                       >
-                        <ShieldAlert className="w-4 h-4 text-rose-500 group-hover:scale-110 transition-transform" />
-                        <span className="text-[10px] text-zinc-300 font-medium mt-1">Fine/Ticket</span>
+                        <ShieldAlert className="w-4.5 h-4.5 text-rose-500 group-hover:scale-110 transition-transform" />
+                        <span className="text-sm text-zinc-200 font-medium mt-1">Fine/Ticket</span>
                       </button>
 
                       <button
@@ -646,35 +671,35 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                         onClick={() => handleQuickAddExpense('Other')}
                         className="bg-zinc-900/30 hover:bg-zinc-900/70 p-2.5 rounded-xl flex flex-col items-center gap-1 text-center group transition-all cursor-pointer active:scale-95 border-none"
                       >
-                        <DollarSign className="w-4 h-4 text-[#8b5cf6] group-hover:scale-110 transition-transform" />
-                        <span className="text-[10px] text-zinc-300 font-medium mt-1">Custom Exp</span>
+                        <DollarSign className="w-4.5 h-4.5 text-[#8b5cf6] group-hover:scale-110 transition-transform" />
+                        <span className="text-sm text-zinc-200 font-medium mt-1">Custom Exp</span>
                       </button>
                     </div>
 
                     {shiftExpenses.length > 0 && (
-                      <div className="bg-zinc-900/20 border border-zinc-900/80 p-2.5 rounded-xl space-y-1.5">
+                      <div className="bg-zinc-900/20 border border-zinc-900/80 p-3 rounded-xl space-y-2">
                         <div className="flex justify-between items-center">
-                          <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
+                          <span className="text-sm font-semibold text-zinc-300 uppercase tracking-wider">
                             Expenses Added ({shiftExpenses.length})
                           </span>
-                          <span className="text-xs font-bold text-rose-400">
+                          <span className="text-sm font-bold text-rose-400">
                             Total: {formatCurrency(liveMetrics.loggedExpenses, profile)}
                           </span>
                         </div>
-                        <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
+                        <div className="flex flex-wrap gap-2 max-h-28 overflow-y-auto pr-1">
                           {shiftExpenses.map((expense) => (
                             <div 
                               key={expense.id}
-                              className="bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-300 pl-2 pr-1 py-0.5 rounded-md flex items-center gap-1"
+                              className="bg-zinc-900 border border-zinc-800 text-sm text-zinc-200 pl-2.5 pr-1.5 py-1 rounded-md flex items-center gap-1.5"
                             >
-                              <span className="font-medium text-zinc-400">{expense.category}:</span>
+                              <span className="font-medium text-zinc-300">{expense.category}:</span>
                               <span className="font-mono font-semibold text-rose-300">{formatCurrency(expense.amount, profile)}</span>
                               <button
                                 type="button"
                                 onClick={() => handleRemoveExpense(expense.id)}
-                                className="text-zinc-500 hover:text-zinc-300 p-0.5 rounded-full hover:bg-zinc-800 transition-colors"
+                                className="text-zinc-400 hover:text-zinc-200 p-0.5 rounded-full hover:bg-zinc-800 transition-colors"
                               >
-                                <X className="w-2.5 h-2.5" />
+                                <X className="w-3 h-3" />
                               </button>
                             </div>
                           ))}
@@ -693,17 +718,17 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                   className="w-full flex items-center justify-between p-3.5 text-left select-none cursor-pointer hover:bg-zinc-900/30 transition-colors"
                 >
                   <div className="flex items-center gap-2.5">
-                    <Sparkles className="w-4 h-4 text-blue-400" />
+                    <Sparkles className="w-4.5 h-4.5 text-blue-400" />
                     <div>
-                      <h3 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">
+                      <h3 className="text-sm font-bold text-zinc-200 uppercase tracking-wider">
                         Smart Shift Notes
                       </h3>
-                      <p className="text-[10px] text-zinc-500">
+                      <p className="text-sm text-zinc-400">
                         {shiftNotes ? 'Custom reminders and context attached' : 'Add context tags or write reminders'}
                       </p>
                     </div>
                   </div>
-                  <div className="text-zinc-500">
+                  <div className="text-zinc-400">
                     {isNotesExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </div>
                 </button>
@@ -711,7 +736,7 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                 {isNotesExpanded && (
                   <div className="p-3 pt-1.5 border-t border-zinc-900/80 bg-zinc-950/30 space-y-3">
                     <div className="space-y-1.5">
-                      <span className="block text-[9px] font-bold text-zinc-500 uppercase tracking-wider select-none">
+                      <span className="block text-sm font-bold text-zinc-300 uppercase tracking-wider select-none">
                         Quick-Tap Context Tags
                       </span>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -729,10 +754,10 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                               type="button"
                               key={tag.value}
                               onClick={() => toggleNoteTag(tag.value)}
-                              className={`text-xs py-2.5 px-3 rounded-xl border font-medium transition-all cursor-pointer active:scale-95 select-none text-center flex items-center justify-center ${
+                              className={`text-sm py-2.5 px-3 rounded-xl border font-medium transition-all cursor-pointer active:scale-95 select-none text-center flex items-center justify-center ${
                                 isSelected
                                   ? 'bg-blue-950/40 border-blue-500 text-blue-300 font-bold shadow-[0_0_10px_rgba(59,130,246,0.2)]'
-                                  : 'bg-zinc-900/40 border-transparent text-zinc-400 hover:text-zinc-200'
+                                  : 'bg-zinc-900/40 border-transparent text-zinc-300 hover:text-zinc-100'
                               }`}
                             >
                               {tag.label}
@@ -743,13 +768,13 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                     </div>
                     
                     <div className="space-y-1">
-                      <span className="block text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Custom Notes</span>
+                      <span className="block text-sm font-bold text-zinc-300 uppercase tracking-wider">Custom Notes</span>
                       <textarea
                         value={shiftNotes}
                         onChange={(e) => setShiftNotes(e.target.value)}
                         placeholder="Flight surges, weather details, downtown traffic reminders..."
                         rows={2}
-                        className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-zinc-650"
+                        className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-zinc-600"
                       />
                     </div>
                   </div>
@@ -761,8 +786,8 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                 <div className="bg-amber-950/20 border border-amber-900/50 p-4 rounded-xl flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Vehicle Wear Alert</h4>
-                    <p className="text-xs text-amber-300/95 mt-1 leading-relaxed">
+                    <h4 className="text-sm font-bold text-amber-400 uppercase tracking-wider">Vehicle Wear Alert</h4>
+                    <p className="text-sm text-amber-300/95 mt-1 leading-relaxed">
                       At {distance} {profile.distanceUnit} driven, your vehicle is absorbing an estimated{' '}
                       <span className="font-bold text-amber-200">{formatCurrency(liveMetrics.depreciationCost, profile)}</span> in wear & tear, oil depletion, tire friction, and depreciation. This will be deducted automatically.
                     </p>
@@ -773,7 +798,7 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
               {/* Date & Fuel Price side-by-side inside high-density horizontal layout */}
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <div>
-                  <label className="block text-xs sm:text-sm font-bold text-zinc-400 mb-1.5 uppercase tracking-wider select-none">
+                  <label className="block text-sm font-bold text-zinc-300 mb-1.5 uppercase tracking-wider select-none">
                     Shift Date
                   </label>
                   <input
@@ -781,17 +806,17 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                     value={shiftDate}
                     onChange={(e) => setShiftDate(e.target.value)}
                     required
-                    className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 px-3 py-2 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-mono"
+                    className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 px-3 py-2 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-mono font-medium"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs sm:text-sm font-bold text-zinc-400 mb-1.5 uppercase tracking-wider flex items-center justify-between select-none">
+                  <label className="block text-sm font-bold text-zinc-300 mb-1.5 uppercase tracking-wider flex items-center justify-between select-none">
                     <span>Fuel Override</span>
                     {Math.abs((parseFloat(activeFuelPrice) || 0) - profile.fuelPrice) > 0.001 && (
                       <button 
                         type="button" 
                         onClick={() => setActiveFuelPrice(profile.fuelPrice.toString())}
-                        className="text-[10px] text-emerald-400 hover:text-emerald-300 font-mono underline"
+                        className="text-xs text-emerald-400 hover:text-emerald-300 font-mono underline font-bold"
                         title="Reset Default"
                       >
                         Reset
@@ -799,7 +824,7 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                     )}
                   </label>
                   <div className="relative">
-                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 font-mono font-semibold text-sm">
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 font-mono font-semibold text-sm">
                       {profile.measurementSystem === 'uk' ? '£' : profile.measurementSystem === 'metric' ? '€' : '$'}
                     </span>
                     <input
@@ -809,9 +834,9 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                       value={activeFuelPrice}
                       onChange={(e) => setActiveFuelPrice(e.target.value)}
                       required
-                      className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 pl-6 pr-8 py-2 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-mono"
+                      className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 pl-6 pr-8 py-2 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-mono font-medium"
                     />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-semibold text-zinc-500">
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400">
                       /{profile.fuelUnit === 'gallons' ? 'gal' : 'L'}
                     </span>
                   </div>
@@ -846,10 +871,10 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
             {/* Upper Portion: Header and Revenue to Profit Comparison */}
             <div>
               <div className="flex items-center justify-between mb-6">
-                <span className="text-[11px] font-bold text-emerald-400/90 uppercase tracking-widest bg-emerald-950/60 border border-emerald-900/60 px-3 py-1 rounded-full font-mono">
+                <span className="text-xs font-bold text-emerald-400/90 uppercase tracking-widest bg-emerald-950/60 border border-emerald-900/60 px-3 py-1 rounded-full font-mono">
                   Real-time Cost Simulator
                 </span>
-                <span className="text-xs text-zinc-500 flex items-center gap-1">
+                <span className="text-sm text-zinc-400 flex items-center gap-1 font-semibold">
                   <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                   Active
                 </span>
@@ -857,7 +882,7 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
 
               {/* Gig Profit Indicator Header */}
               <div className="text-center py-4 border-b border-zinc-900/80">
-                <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Calculated Real Net Profit</p>
+                <p className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Calculated Real Net Profit</p>
                 <h3 className={`text-4xl md:text-5xl font-display font-extrabold mt-2 tracking-tight transition-all duration-300 ${
                    liveMetrics.netProfit > 0 
                      ? 'text-emerald-400' 
@@ -867,8 +892,8 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                  }`}>
                   {formatCurrency(liveMetrics.netProfit, profile)}
                 </h3>
-                <p className="text-xs text-zinc-400 mt-2 font-mono flex items-center justify-center gap-1">
-                  Gross: <span className="text-zinc-300">{formatCurrency(grossRevenue, profile)}</span> 
+                <p className="text-sm text-zinc-300 mt-2 font-mono flex items-center justify-center gap-1.5">
+                  Gross: <span className="text-zinc-100 font-semibold">{formatCurrency(grossRevenue, profile)}</span> 
                   <span className="text-zinc-600">|</span> 
                   Real Net: <span className={liveMetrics.netProfit > 0 ? 'text-emerald-400 font-bold' : ''}>
                     {grossRevenue > 0 ? ((liveMetrics.netProfit / grossRevenue) * 100).toFixed(0) : 0}%
@@ -880,9 +905,9 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
               <div className="grid grid-cols-2 gap-4 py-5 font-mono">
                 
                 <div className="bg-zinc-900/20 border border-zinc-900 p-3.5 rounded-2xl">
-                  <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Gross Hourly</p>
-                  <p className="text-base font-bold text-zinc-300 mt-1">
-                    {formatCurrency(hoursOnline > 0 ? grossRevenue / hoursOnline : 0, profile)}<span className="text-xs font-normal text-zinc-500">/hr</span>
+                  <p className="text-xs text-zinc-400 uppercase font-semibold tracking-wider">Gross Hourly</p>
+                  <p className="text-base font-bold text-zinc-200 mt-1">
+                    {formatCurrency(hoursOnline > 0 ? grossRevenue / hoursOnline : 0, profile)}<span className="text-sm font-medium text-zinc-400">/hr</span>
                   </p>
                 </div>
 
@@ -890,9 +915,9 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                   <div className="absolute top-2 right-2">
                     <TrendingUp className="w-4 h-4 text-emerald-400" />
                   </div>
-                  <p className="text-[10px] text-emerald-500 uppercase tracking-wider font-semibold">Real Net Hourly</p>
+                  <p className="text-xs text-emerald-400 uppercase tracking-wider font-bold">Real Net Hourly</p>
                   <p className="text-lg font-extrabold text-emerald-400 mt-0.5">
-                    {formatCurrency(liveMetrics.hourlyWage, profile)}<span className="text-xs font-semibold text-emerald-500">/hr</span>
+                    {formatCurrency(liveMetrics.hourlyWage, profile)}<span className="text-sm font-semibold text-emerald-400">/hr</span>
                   </p>
                 </div>
 
@@ -900,19 +925,19 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
 
               {/* Deductions Breakdown */}
               <div className="space-y-4 pt-3">
-                <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Cost Deductions Breakdown</h4>
+                <h4 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">Cost Deductions Breakdown</h4>
                 
                 <div className="space-y-3 font-mono">
                   
                   {/* Fuel Deduction */}
                   <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-zinc-500">Fuel Surcharge Cost</span>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-zinc-400 font-medium">Fuel Surcharge Cost</span>
                       <span className="text-amber-400 font-bold">{formatCurrency(liveMetrics.fuelCost, profile)}</span>
                     </div>
-                    <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
+                    <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
                       <div 
-                        className="bg-amber-500 h-1.5 rounded-full transition-all duration-300" 
+                        className="bg-amber-500 h-2 rounded-full transition-all duration-300" 
                         style={{ width: `${grossRevenue > 0 ? Math.min((liveMetrics.fuelCost / grossRevenue) * 100, 100) : 0}%` }}
                       ></div>
                     </div>
@@ -920,13 +945,13 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
 
                   {/* Wear and Tear Deduction */}
                   <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-zinc-500">Wear, Tires & Depreciation</span>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-zinc-400 font-medium">Wear, Tires & Depreciation</span>
                       <span className="text-orange-400 font-bold">{formatCurrency(liveMetrics.depreciationCost, profile)}</span>
                     </div>
-                    <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
+                    <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
                       <div 
-                        className="bg-orange-500 h-1.5 rounded-full transition-all duration-300" 
+                        className="bg-orange-500 h-2 rounded-full transition-all duration-300" 
                         style={{ width: `${grossRevenue > 0 ? Math.min((liveMetrics.depreciationCost / grossRevenue) * 100, 100) : 0}%` }}
                       ></div>
                     </div>
@@ -934,13 +959,13 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
 
                   {/* Manual Logged Expenses */}
                   <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-zinc-500">Extra Quick-Logged Expenses</span>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-zinc-400 font-medium">Extra Quick-Logged Expenses</span>
                       <span className="text-rose-400 font-bold">{formatCurrency(liveMetrics.loggedExpenses, profile)}</span>
                     </div>
-                    <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
+                    <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden">
                       <div 
-                        className="bg-rose-500 h-1.5 rounded-full transition-all duration-300" 
+                        className="bg-rose-500 h-2 rounded-full transition-all duration-300" 
                         style={{ width: `${grossRevenue > 0 ? Math.min((liveMetrics.loggedExpenses / grossRevenue) * 100, 100) : 0}%` }}
                       ></div>
                     </div>
@@ -953,10 +978,10 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
 
             {/* Bottom Section: Net Profit Explanation */}
             <div className="mt-8 pt-5 border-t border-zinc-900/60 bg-zinc-900/10 p-4 rounded-2xl border border-zinc-900">
-              <h5 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-                <AlertCircle className="w-3.5 h-3.5 text-emerald-400" /> Driver Truth
+              <h5 className="text-sm font-bold text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 text-emerald-400" /> Driver Truth
               </h5>
-              <p className="text-[11px] text-zinc-400 mt-2 leading-relaxed">
+              <p className="text-sm text-zinc-300 mt-2 leading-relaxed">
                 Rideshare platforms advertise high gross payouts, but driving a vehicle consumes real equity. After gas expense ({formatCurrency(liveMetrics.fuelCost, profile)}) and car depreciation ({formatCurrency(liveMetrics.depreciationCost, profile)}), your real earning rate is <span className="text-emerald-400 font-bold">{formatCurrency(liveMetrics.hourlyWage, profile)}/hr</span> instead of {formatCurrency(hoursOnline > 0 ? grossRevenue / hoursOnline : 0, profile)}/hr.
               </p>
             </div>
@@ -991,7 +1016,7 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
 
               <form onSubmit={handleCustomExpenseSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-1.5">
+                  <label className="block text-sm font-bold text-zinc-300 uppercase tracking-wider mb-1.5">
                     Amount ({profile.measurementSystem === 'uk' ? 'GBP' : profile.measurementSystem === 'metric' ? 'EUR' : 'USD'})
                   </label>
                   <div className="relative">
@@ -1016,13 +1041,13 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                   <button
                     type="button"
                     onClick={() => setShowCustomExpenseModal(false)}
-                    className="flex-1 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 rounded-xl text-xs font-semibold border border-zinc-800/80 transition-colors"
+                    className="flex-1 py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl text-sm font-bold border border-zinc-800/80 transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-purple-900/30 transition-colors"
+                    className="flex-1 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-purple-900/30 transition-colors cursor-pointer"
                   >
                     Add Expense
                   </button>
@@ -1055,6 +1080,22 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
           {renderButtonContent()}
         </button>
       </div>
+
+      {/* Interactive Range Slider Modal Sheet */}
+      <RangeSliderModal
+        isOpen={sliderModalType !== null}
+        type={sliderModalType}
+        onClose={() => setSliderModalType(null)}
+        currencySymbol={profile.measurementSystem === 'uk' ? '£' : profile.measurementSystem === 'metric' ? '€' : '$'}
+        distanceUnit={profile.distanceUnit}
+        initialIncome={parseFloat(grossRevenueInput) || 0}
+        initialDistance={parseFloat(distanceInput) || 0}
+        initialHours={parseInt(hoursPart, 10) || 0}
+        initialMinutes={parseInt(minutesPart, 10) || 0}
+        onConfirmIncome={handleConfirmIncome}
+        onConfirmDistance={handleConfirmDistance}
+        onConfirmTime={handleConfirmTime}
+      />
 
     </div>
   );
