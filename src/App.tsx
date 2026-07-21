@@ -52,33 +52,33 @@ export default function App() {
   }, []);
 
   const [profile, setProfile] = useState<VehicleProfile>(() => {
-    const stored = localStorage.getItem(STORAGE_KEYS.PROFILE);
-    if (stored) {
-      try {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.PROFILE);
+      if (stored) {
         const parsed = JSON.parse(stored);
         if (!parsed.fuelPriceHistory) {
           parsed.fuelPriceHistory = [];
         }
         return parsed;
-      } catch (e) {
-        // Fallback to default
       }
+    } catch (e) {
+      console.warn('LocalStorage profile access unavailable:', e);
     }
     return getInitialVehicleProfile();
   });
 
   const [logs, setLogs] = useState<ShiftLog[]>(() => {
-    const stored = localStorage.getItem(STORAGE_KEYS.LOGS);
-    if (stored) {
-      try {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.LOGS);
+      if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
           // Clear any pre-populated dummy shift logs or past metrics from existing storage
           return parsed.filter((log: any) => log && log.id && !log.id.startsWith('log-'));
         }
-      } catch (e) {
-        // Fallback
       }
+    } catch (e) {
+      console.warn('LocalStorage logs access unavailable:', e);
     }
     return [];
   });
@@ -86,13 +86,21 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<AppTab>('dashboard');
   const [dashboardResetKey, setDashboardResetKey] = useState(0);
 
-  // Persistence triggers
+  // Persistence triggers safely guarded against iframe sandbox storage errors
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
+    try {
+      localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
+    } catch (e) {
+      console.warn('LocalStorage profile save failed:', e);
+    }
   }, [profile]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(logs));
+    try {
+      localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(logs));
+    } catch (e) {
+      console.warn('LocalStorage logs save failed:', e);
+    }
   }, [logs]);
 
   // Handle shift deletion
@@ -107,14 +115,21 @@ export default function App() {
 
   // Reset data wipes
   const handleClearAllLogs = () => {
-    localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify([]));
-    setLogs([]);
-    
+    // 1. Explicitly update React in-memory state FIRST
     const resetProfile = getInitialVehicleProfile();
+    setLogs([]);
     setProfile(resetProfile);
-    localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(resetProfile));
-    
     setDashboardResetKey(prev => prev + 1);
+
+    // 2. Safely perform localStorage operations in try...catch
+    try {
+      localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify([]));
+      localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(resetProfile));
+      localStorage.removeItem(STORAGE_KEYS.LOGS);
+      localStorage.removeItem(STORAGE_KEYS.PROFILE);
+    } catch (e) {
+      console.warn('LocalStorage clear bypassed due to iframe restriction:', e);
+    }
   };
 
   // Seeding logs manually
