@@ -164,9 +164,9 @@ If you have ideas to improve GIG DRIVER, feel free to open an issue or submit a 
 
 ---
 
-## 📄 License
+## 📄 Copyright
 
-This project is released under the **MIT License**.
+All Rights Reserved
 
 ---
 
