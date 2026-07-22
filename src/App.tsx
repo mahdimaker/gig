@@ -143,6 +143,11 @@ export default function App() {
     setLogs(prev => prev.filter(log => log.id !== id));
   };
 
+  // Handle shift edit/update
+  const handleUpdateLog = (updatedLog: ShiftLog) => {
+    setLogs(prev => prev.map(log => log.id === updatedLog.id ? updatedLog : log));
+  };
+
   // Handle adding a new shift log
   const handleLogShift = (newLog: ShiftLog) => {
     setLogs(prev => [newLog, ...prev]);
@@ -217,34 +222,34 @@ export default function App() {
         
         {/* Floating Sticky Navigation Pill Container */}
         <div className="sticky top-2 z-30 mb-5 transition-all" id="sticky-navigation-wrapper">
-          <nav className="grid grid-cols-4 gap-1.5 sm:gap-2 bg-zinc-950/90 border border-zinc-800/90 p-1 sm:p-1.5 rounded-2xl max-w-7xl mx-auto backdrop-blur-xl shadow-xl shadow-black/50 ring-1 ring-white/5" id="navigation-bar">
+          <nav className="grid grid-cols-4 gap-1.5 sm:gap-2 bg-zinc-950/90 border border-zinc-800/90 p-1.5 sm:p-2 rounded-2xl max-w-7xl mx-auto backdrop-blur-xl shadow-xl shadow-black/50 ring-1 ring-white/5" id="navigation-bar">
             
             <button
               onClick={() => setActiveTab('dashboard')}
-              className={`py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 ${
+              className={`py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl font-semibold text-xs sm:text-base flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 ${
                 activeTab === 'dashboard'
                   ? 'bg-zinc-900 border border-zinc-700/80 text-emerald-400 font-bold shadow-md shadow-black/20'
                   : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/50'
               }`}
               id="tab-dashboard"
             >
-              <LayoutDashboard className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <LayoutDashboard className="w-4 h-4 sm:w-5 sm:h-5" />
               <span>Dashboard</span>
             </button>
 
             <button
               onClick={() => setActiveTab('history')}
-              className={`py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 ${
+              className={`py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl font-semibold text-xs sm:text-base flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 ${
                 activeTab === 'history'
                   ? 'bg-zinc-900 border border-zinc-700/80 text-emerald-400 font-bold shadow-md shadow-black/20'
                   : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/50'
               }`}
               id="tab-history"
             >
-              <HistoryIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <HistoryIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               <span>Shift Logs</span>
               {logs.length > 0 && (
-                <span className="hidden sm:inline-block text-[10px] sm:text-xs bg-zinc-800/80 text-zinc-400 px-1.5 py-0.5 rounded-full font-mono">
+                <span className="hidden sm:inline-block text-xs bg-zinc-800/80 text-zinc-400 px-2 py-0.5 rounded-full font-mono">
                   {logs.length}
                 </span>
               )}
@@ -252,27 +257,27 @@ export default function App() {
 
             <button
               onClick={() => setActiveTab('stats')}
-              className={`py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 ${
+              className={`py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl font-semibold text-xs sm:text-base flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 ${
                 activeTab === 'stats'
                   ? 'bg-zinc-900 border border-zinc-700/80 text-emerald-400 font-bold shadow-md shadow-black/20'
                   : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/50'
               }`}
               id="tab-stats"
             >
-              <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
               <span>Analytics</span>
             </button>
 
             <button
               onClick={() => setActiveTab('settings')}
-              className={`py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 ${
+              className={`py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl font-semibold text-xs sm:text-base flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 ${
                 activeTab === 'settings'
                   ? 'bg-zinc-900 border border-zinc-700/80 text-emerald-400 font-bold shadow-md shadow-black/20'
                   : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/50'
               }`}
               id="tab-settings"
             >
-              <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
               <span>Calibration</span>
             </button>
 
@@ -304,6 +309,7 @@ export default function App() {
                 <History 
                   logs={logs} 
                   onDeleteLog={handleDeleteLog}
+                  onUpdateLog={handleUpdateLog}
                   distanceUnit={profile.distanceUnit}
                   profile={profile}
                 />

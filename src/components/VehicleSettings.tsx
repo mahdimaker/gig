@@ -866,100 +866,100 @@ export default function VehicleSettings({
               </p>
             </div>
 
-            <form onSubmit={handleSaveExpenseDefaults} className="space-y-4">
-              <div className="space-y-2.5">
+            <form onSubmit={handleSaveExpenseDefaults} className="space-y-3">
+              <div className="space-y-2">
                 
                 {/* Toll Rate Row */}
-                <div className="bg-zinc-900/30 p-3.5 rounded-xl flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-amber-950/20 border border-amber-900/30 rounded-lg text-amber-500">
-                      <Coins className="w-4 h-4" />
+                <div className="bg-zinc-900/30 py-2 px-3 rounded-xl flex items-center justify-between gap-3 border border-zinc-900/60">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div className="p-1.5 bg-amber-950/20 border border-amber-900/30 rounded-lg text-amber-500 shrink-0">
+                      <Coins className="w-3.5 h-3.5" />
                     </div>
-                    <div>
-                      <span className="block text-sm sm:text-base font-bold text-zinc-100">Toll Rate</span>
-                      <span className="block text-xs sm:text-sm text-zinc-300 font-medium">Standard bridge or highway tolls</span>
+                    <div className="flex items-center gap-2 min-w-0 truncate">
+                      <span className="text-xs sm:text-sm font-bold text-zinc-100 shrink-0">Toll Rate</span>
+                      <span className="text-[11px] text-zinc-400 font-medium truncate hidden sm:inline">• Bridge or highway tolls</span>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-1 bg-zinc-950/40 px-3 py-1.5 rounded-xl border border-zinc-900/80 focus-within:border-emerald-500/40 transition-all">
-                    <span className="text-zinc-400 font-mono font-black text-sm select-none">{currencySymbol}</span>
+                  <div className="flex items-center gap-1 bg-zinc-950/50 px-2.5 py-1 rounded-lg border border-zinc-900 focus-within:border-emerald-500/40 transition-all shrink-0">
+                    <span className="text-zinc-400 font-mono font-black text-xs select-none">{currencySymbol}</span>
                     <input
                       type="number"
                       step="0.01"
                       min="0"
                       value={tollsDefault}
                       onChange={(e) => setTollsDefault(e.target.value)}
-                      className="bg-transparent border-none text-emerald-400 font-mono font-black text-right text-sm sm:text-base focus:outline-none focus:ring-0 p-0 w-16"
+                      className="bg-transparent border-none text-emerald-400 font-mono font-black text-right text-xs sm:text-sm focus:outline-none focus:ring-0 p-0 w-14 sm:w-16"
                     />
                   </div>
                 </div>
 
                 {/* Car Wash Row */}
-                <div className="bg-zinc-900/30 p-3.5 rounded-xl flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-sky-950/20 border border-sky-900/30 rounded-lg text-sky-400">
-                      <Sparkles className="w-4 h-4" />
+                <div className="bg-zinc-900/30 py-2 px-3 rounded-xl flex items-center justify-between gap-3 border border-zinc-900/60">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div className="p-1.5 bg-sky-950/20 border border-sky-900/30 rounded-lg text-sky-400 shrink-0">
+                      <Sparkles className="w-3.5 h-3.5" />
                     </div>
-                    <div>
-                      <span className="block text-sm sm:text-base font-bold text-zinc-100">Car Wash</span>
-                      <span className="block text-xs sm:text-sm text-zinc-300 font-medium">Routine shift preparation wash</span>
+                    <div className="flex items-center gap-2 min-w-0 truncate">
+                      <span className="text-xs sm:text-sm font-bold text-zinc-100 shrink-0">Car Wash</span>
+                      <span className="text-[11px] text-zinc-400 font-medium truncate hidden sm:inline">• Routine shift wash</span>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-1 bg-zinc-950/40 px-3 py-1.5 rounded-xl border border-zinc-900/80 focus-within:border-emerald-500/40 transition-all">
-                    <span className="text-zinc-400 font-mono font-black text-sm select-none">{currencySymbol}</span>
+                  <div className="flex items-center gap-1 bg-zinc-950/50 px-2.5 py-1 rounded-lg border border-zinc-900 focus-within:border-emerald-500/40 transition-all shrink-0">
+                    <span className="text-zinc-400 font-mono font-black text-xs select-none">{currencySymbol}</span>
                     <input
                       type="number"
                       step="0.01"
                       min="0"
                       value={carWashDefault}
                       onChange={(e) => setCarWashDefault(e.target.value)}
-                      className="bg-transparent border-none text-emerald-400 font-mono font-black text-right text-sm sm:text-base focus:outline-none focus:ring-0 p-0 w-16"
+                      className="bg-transparent border-none text-emerald-400 font-mono font-black text-right text-xs sm:text-sm focus:outline-none focus:ring-0 p-0 w-14 sm:w-16"
                     />
                   </div>
                 </div>
 
                 {/* Standard Parking Row */}
-                <div className="bg-zinc-900/30 p-3.5 rounded-xl flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-950/20 border border-emerald-900/30 rounded-lg text-emerald-400">
-                      <SquareParking className="w-4 h-4" />
+                <div className="bg-zinc-900/30 py-2 px-3 rounded-xl flex items-center justify-between gap-3 border border-zinc-900/60">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div className="p-1.5 bg-emerald-950/20 border border-emerald-900/30 rounded-lg text-emerald-400 shrink-0">
+                      <SquareParking className="w-3.5 h-3.5" />
                     </div>
-                    <div>
-                      <span className="block text-sm sm:text-base font-bold text-zinc-100">Standard Parking</span>
-                      <span className="block text-xs sm:text-sm text-zinc-300 font-medium">Average metered space or garage fee</span>
+                    <div className="flex items-center gap-2 min-w-0 truncate">
+                      <span className="text-xs sm:text-sm font-bold text-zinc-100 shrink-0">Standard Parking</span>
+                      <span className="text-[11px] text-zinc-400 font-medium truncate hidden sm:inline">• Metered space/garage fee</span>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-1 bg-zinc-950/40 px-3 py-1.5 rounded-xl border border-zinc-900/80 focus-within:border-emerald-500/40 transition-all">
-                    <span className="text-zinc-400 font-mono font-black text-sm select-none">{currencySymbol}</span>
+                  <div className="flex items-center gap-1 bg-zinc-950/50 px-2.5 py-1 rounded-lg border border-zinc-900 focus-within:border-emerald-500/40 transition-all shrink-0">
+                    <span className="text-zinc-400 font-mono font-black text-xs select-none">{currencySymbol}</span>
                     <input
                       type="number"
                       step="0.01"
                       min="0"
                       value={parkingDefault}
                       onChange={(e) => setParkingDefault(e.target.value)}
-                      className="bg-transparent border-none text-emerald-400 font-mono font-black text-right text-sm sm:text-base focus:outline-none focus:ring-0 p-0 w-16"
+                      className="bg-transparent border-none text-emerald-400 font-mono font-black text-right text-xs sm:text-sm focus:outline-none focus:ring-0 p-0 w-14 sm:w-16"
                     />
                   </div>
                 </div>
 
                 {/* Custom Quick Buttons List */}
                 {customButtons.map((btn) => (
-                  <div key={btn.id} className="bg-zinc-900/30 p-3.5 rounded-xl flex items-center justify-between gap-4 border border-dashed border-zinc-800/40">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-purple-950/20 border border-purple-900/30 rounded-lg text-purple-400">
-                        <Coins className="w-4 h-4" />
+                  <div key={btn.id} className="bg-zinc-900/30 py-2 px-3 rounded-xl flex items-center justify-between gap-3 border border-dashed border-zinc-800/60">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <div className="p-1.5 bg-purple-950/20 border border-purple-900/30 rounded-lg text-purple-400 shrink-0">
+                        <Coins className="w-3.5 h-3.5" />
                       </div>
-                      <div>
-                        <span className="block text-sm sm:text-base font-bold text-zinc-100">{btn.label}</span>
-                        <span className="block text-xs sm:text-sm text-zinc-300 font-medium">Custom tap button (linked to {btn.category})</span>
+                      <div className="flex items-center gap-2 min-w-0 truncate">
+                        <span className="text-xs sm:text-sm font-bold text-zinc-100 shrink-0">{btn.label}</span>
+                        <span className="text-[11px] text-zinc-400 font-medium truncate hidden sm:inline">• Custom ({btn.category})</span>
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1 bg-zinc-950/40 px-3 py-1.5 rounded-xl border border-zinc-900/80 focus-within:border-emerald-500/40 transition-all">
-                        <span className="text-zinc-400 font-mono font-black text-sm select-none">{currencySymbol}</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-1 bg-zinc-950/50 px-2.5 py-1 rounded-lg border border-zinc-900 focus-within:border-emerald-500/40 transition-all">
+                        <span className="text-zinc-400 font-mono font-black text-xs select-none">{currencySymbol}</span>
                         <input
                           type="number"
                           step="0.01"
@@ -969,7 +969,7 @@ export default function VehicleSettings({
                             const val = parseFloat(e.target.value) || 0;
                             setCustomButtons(prev => prev.map(b => b.id === btn.id ? { ...b, amount: val } : b));
                           }}
-                          className="bg-transparent border-none text-emerald-400 font-mono font-black text-right text-sm sm:text-base focus:outline-none focus:ring-0 p-0 w-16"
+                          className="bg-transparent border-none text-emerald-400 font-mono font-black text-right text-xs sm:text-sm focus:outline-none focus:ring-0 p-0 w-14 sm:w-16"
                         />
                       </div>
                       <button
@@ -978,7 +978,7 @@ export default function VehicleSettings({
                         className="text-zinc-400 hover:text-rose-400 p-1 rounded-lg hover:bg-zinc-900 transition-all cursor-pointer"
                         title="Delete custom button"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -1094,69 +1094,6 @@ export default function VehicleSettings({
         {/* Right Section: System Maintenance / Reset Controls (1 Col) */}
         <div className="lg:col-span-1 space-y-6">
           
-          {/* Data Backup & Restore Panel */}
-          <section className="bg-zinc-950 border border-zinc-900 rounded-2xl p-5 space-y-4" id="data-backup-restore-panel">
-            <div>
-              <h3 className="font-display font-bold text-sm sm:text-base text-zinc-200 uppercase tracking-wider flex items-center gap-2">
-                <Database className="w-4 h-4 text-emerald-400" /> Data Backup & Restore
-              </h3>
-              <p className="text-xs sm:text-sm text-zinc-400 mt-1 font-medium">
-                Save your logs and vehicle calibrations or restore from a backup file.
-              </p>
-            </div>
-
-            {importSuccess && (
-              <div className="p-3 bg-emerald-950/40 border border-emerald-800/60 rounded-xl text-xs text-emerald-300 font-medium flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                <span>{importSuccess}</span>
-              </div>
-            )}
-
-            {importError && (
-              <div className="p-3 bg-rose-950/40 border border-rose-800/60 rounded-xl text-xs text-rose-300 font-medium flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
-                <span>{importError}</span>
-              </div>
-            )}
-
-            <div className="space-y-3 pt-1">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {/* Export Action */}
-                <button
-                  type="button"
-                  onClick={exportDataCSV}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500/50 py-3 px-3.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-md shadow-emerald-950/30"
-                  id="export-backup-csv-button"
-                >
-                  <Download className="w-4 h-4 text-emerald-100" />
-                  <span>Export Backup (CSV)</span>
-                </button>
-
-                {/* Import Action */}
-                <div>
-                  <label
-                    htmlFor="backup-file-upload"
-                    className="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/50 hover:border-amber-500/80 py-3 px-3.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] text-center shadow-sm"
-                    id="import-backup-csv-button"
-                  >
-                    <Upload className="w-4 h-4 text-amber-400" />
-                    <span>Import Backup (CSV)</span>
-                  </label>
-                  <input
-                    type="file"
-                    id="backup-file-upload"
-                    accept=".csv,.json"
-                    onChange={handleFileImport}
-                    className="hidden"
-                  />
-                </div>
-              </div>
-              <p className="text-[11px] text-zinc-500 font-medium leading-tight">
-                Exports or restores shift logs and vehicle calibration settings as a clean CSV file.
-              </p>
-            </div>
-          </section>
-
           <section className="bg-zinc-950 border border-zinc-900 rounded-2xl p-5 space-y-5" id="maintenance-settings-panel">
             <div>
               <h3 className="font-display font-bold text-sm sm:text-base text-zinc-200 uppercase tracking-wider">
@@ -1238,6 +1175,69 @@ export default function VehicleSettings({
             <p className="text-xs text-zinc-400 leading-relaxed font-medium">
               *Adjusting price in the shift log or settings automatically logs a timestamped calibration entry.
             </p>
+          </section>
+
+          {/* Data Backup & Restore Panel */}
+          <section className="bg-zinc-950 border border-zinc-900 rounded-2xl p-5 space-y-4" id="data-backup-restore-panel">
+            <div>
+              <h3 className="font-display font-bold text-sm sm:text-base text-zinc-200 uppercase tracking-wider flex items-center gap-2">
+                <Database className="w-4 h-4 text-emerald-400" /> Data Backup & Restore
+              </h3>
+              <p className="text-xs sm:text-sm text-zinc-400 mt-1 font-medium">
+                Save your logs and vehicle calibrations or restore from a backup file.
+              </p>
+            </div>
+
+            {importSuccess && (
+              <div className="p-3 bg-emerald-950/40 border border-emerald-800/60 rounded-xl text-xs text-emerald-300 font-medium flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <span>{importSuccess}</span>
+              </div>
+            )}
+
+            {importError && (
+              <div className="p-3 bg-rose-950/40 border border-rose-800/60 rounded-xl text-xs text-rose-300 font-medium flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                <span>{importError}</span>
+              </div>
+            )}
+
+            <div className="space-y-3 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {/* Export Action */}
+                <button
+                  type="button"
+                  onClick={exportDataCSV}
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500/50 py-3 px-3.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-md shadow-emerald-950/30"
+                  id="export-backup-csv-button"
+                >
+                  <Download className="w-4 h-4 text-emerald-100" />
+                  <span>Export Backup (CSV)</span>
+                </button>
+
+                {/* Import Action */}
+                <div>
+                  <label
+                    htmlFor="backup-file-upload"
+                    className="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/50 hover:border-amber-500/80 py-3 px-3.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] text-center shadow-sm"
+                    id="import-backup-csv-button"
+                  >
+                    <Upload className="w-4 h-4 text-amber-400" />
+                    <span>Import Backup (CSV)</span>
+                  </label>
+                  <input
+                    type="file"
+                    id="backup-file-upload"
+                    accept=".csv,.json"
+                    onChange={handleFileImport}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+              <p className="text-[11px] text-zinc-500 font-medium leading-tight">
+                Exports or restores shift logs and vehicle calibration settings as a clean CSV file.
+              </p>
+            </div>
           </section>
         </div>
 

@@ -21,29 +21,41 @@ import {
   ChevronDown,
   X,
   SlidersHorizontal,
-  RotateCcw
+  RotateCcw,
+  Edit3
 } from 'lucide-react';
 import { ShiftLog, PLATFORMS, VehicleProfile } from '../types';
 import { formatCurrency, formatDuration } from '../utils';
 import { motion, AnimatePresence } from 'motion/react';
 import AdSlot from './AdSlot';
+import EditShiftModal from './EditShiftModal';
 
 interface HistoryProps {
   logs: ShiftLog[];
   onDeleteLog: (id: string) => void;
+  onUpdateLog?: (updatedLog: ShiftLog) => void;
   distanceUnit: string;
   profile: VehicleProfile;
 }
 
 type SortField = 'date' | 'netProfit' | 'grossRevenue' | 'hourlyWage';
 type SortOrder = 'asc' | 'desc';
+type DateRangePreset = 'all' | 'today' | 'week' | 'month' | 'year' | 'custom';
 
-export default function History({ logs, onDeleteLog, distanceUnit, profile }: HistoryProps) {
+export default function History({ logs, onDeleteLog, onUpdateLog, distanceUnit, profile }: HistoryProps) {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedPlatformFilter, setSelectedPlatformFilter] = useState<string>('All');
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState<boolean>(false);
   
+  // Date Range Filtering state
+  const [datePreset, setDatePreset] = useState<DateRangePreset>('all');
+  const [customStartDate, setCustomStartDate] = useState<string>('');
+  const [customEndDate, setCustomEndDate] = useState<string>('');
+
+  // Shift Edit state
+  const [editingLog, setEditingLog] = useState<ShiftLog | null>(null);
+
   // Sorting state
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
@@ -59,19 +71,73 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
   };
 
   const hasActiveFilters = useMemo(() => {
-    return selectedPlatformFilter !== 'All' || sortField !== 'date' || sortOrder !== 'desc' || searchTerm.trim() !== '';
-  }, [selectedPlatformFilter, sortField, sortOrder, searchTerm]);
+    return (
+      selectedPlatformFilter !== 'All' || 
+      sortField !== 'date' || 
+      sortOrder !== 'desc' || 
+      searchTerm.trim() !== '' ||
+      datePreset !== 'all' ||
+      customStartDate !== '' ||
+      customEndDate !== ''
+    );
+  }, [selectedPlatformFilter, sortField, sortOrder, searchTerm, datePreset, customStartDate, customEndDate]);
 
   const resetFilters = () => {
     setSearchTerm('');
     setSelectedPlatformFilter('All');
     setSortField('date');
     setSortOrder('desc');
+    setDatePreset('all');
+    setCustomStartDate('');
+    setCustomEndDate('');
   };
 
   // Filter & Search & Sort logs
   const processedLogs = useMemo(() => {
     let result = [...logs];
+
+    // Date range filter
+    if (datePreset !== 'all') {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
+
+      if (datePreset === 'today') {
+        result = result.filter(log => log.date === todayStr);
+      } else if (datePreset === 'week') {
+        const dayOfWeek = now.getDay();
+        const diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+        const monday = new Date(now);
+        monday.setDate(now.getDate() + diffToMon);
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+
+        const fmt = (d: Date) => {
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const dy = String(d.getDate()).padStart(2, '0');
+          return `${y}-${m}-${dy}`;
+        };
+        const monStr = fmt(monday);
+        const sunStr = fmt(sunday);
+
+        result = result.filter(log => log.date >= monStr && log.date <= sunStr);
+      } else if (datePreset === 'month') {
+        const monthStr = `${year}-${month}`;
+        result = result.filter(log => log.date.startsWith(monthStr));
+      } else if (datePreset === 'year') {
+        result = result.filter(log => log.date.startsWith(year.toString()));
+      } else if (datePreset === 'custom') {
+        if (customStartDate) {
+          result = result.filter(log => log.date >= customStartDate);
+        }
+        if (customEndDate) {
+          result = result.filter(log => log.date <= customEndDate);
+        }
+      }
+    }
 
     // Filter by platform
     if (selectedPlatformFilter !== 'All') {
@@ -105,7 +171,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
     });
 
     return result;
-  }, [logs, selectedPlatformFilter, searchTerm, sortField, sortOrder]);
+  }, [logs, datePreset, customStartDate, customEndDate, selectedPlatformFilter, searchTerm, sortField, sortOrder]);
 
   const toggleExpand = (id: string) => {
     setExpandedLogId(prev => prev === id ? null : id);
@@ -126,10 +192,10 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
   return (
     <div className="space-y-4" id="history-tab-container">
       
-      {/* Search & Filter Header Bar - Compact Single Line */}
+      {/* Search & Filter Header Bar */}
       <section className="bg-zinc-950 border border-zinc-900 rounded-2xl p-3 sm:p-4 space-y-3 w-full" id="history-filters-bar">
         
-        {/* Compact Single Header Line: Search Input + Filter Toggle Button */}
+        {/* Top Row: Search Input + Filter Toggle Button */}
         <div className="flex items-center gap-2 w-full">
           {/* Search Box */}
           <div className="relative flex-1">
@@ -138,7 +204,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
             </span>
             <input
               type="text"
-              placeholder="Search shifts..."
+              placeholder="Search shifts by note, platform, date..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-zinc-900/90 border border-zinc-800 text-zinc-200 pl-9 pr-8 py-2 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-sans"
@@ -177,7 +243,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
           </button>
         </div>
 
-        {/* Collapsible Extended Controls (Platform & Sorting) */}
+        {/* Collapsible Extended Controls (Timeframe, Platform & Sorting) */}
         <AnimatePresence>
           {isFilterPanelOpen && (
             <motion.div
@@ -188,6 +254,71 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
               className="overflow-hidden border-t border-zinc-900 pt-3 space-y-3"
               id="history-collapsible-filter-panel"
             >
+              {/* Date Range Selector Bar (TIMEFRAME) */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 p-1.5 bg-zinc-900/80 border border-zinc-800/80 rounded-xl" id="date-range-preset-bar">
+                <div className="flex items-center gap-1.5 px-2 py-0.5 text-xs font-bold text-zinc-400 uppercase tracking-wider shrink-0">
+                  <Calendar className="w-3.5 h-3.5 text-emerald-400" /> Timeframe:
+                </div>
+                
+                <div className="flex flex-wrap items-center gap-1 flex-1">
+                  {[
+                    { id: 'all', label: 'All Time' },
+                    { id: 'today', label: 'Today' },
+                    { id: 'week', label: 'This Week' },
+                    { id: 'month', label: 'This Month' },
+                    { id: 'year', label: 'This Year' },
+                    { id: 'custom', label: 'Custom Range' },
+                  ].map(preset => (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => setDatePreset(preset.id as DateRangePreset)}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        datePreset === preset.id
+                          ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-950/50'
+                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60'
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom Date Range Pickers (if Custom is selected) */}
+              {datePreset === 'custom' && (
+                <div className="flex flex-col sm:flex-row items-center gap-2.5 bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-800/80 text-xs text-zinc-300">
+                  <div className="flex items-center gap-2 w-full sm:w-auto flex-1">
+                    <span className="text-zinc-400 font-bold shrink-0">Start Date:</span>
+                    <input
+                      type="date"
+                      value={customStartDate}
+                      onChange={(e) => setCustomStartDate(e.target.value)}
+                      className="bg-zinc-950 border border-zinc-800 text-zinc-100 px-2.5 py-1.5 rounded-lg font-mono text-xs focus:outline-none focus:border-emerald-500 w-full cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 w-full sm:w-auto flex-1">
+                    <span className="text-zinc-400 font-bold shrink-0">End Date:</span>
+                    <input
+                      type="date"
+                      value={customEndDate}
+                      onChange={(e) => setCustomEndDate(e.target.value)}
+                      className="bg-zinc-950 border border-zinc-800 text-zinc-100 px-2.5 py-1.5 rounded-lg font-mono text-xs focus:outline-none focus:border-emerald-500 w-full cursor-pointer"
+                    />
+                  </div>
+                  {(customStartDate || customEndDate) && (
+                    <button
+                      type="button"
+                      onClick={() => { setCustomStartDate(''); setCustomEndDate(''); }}
+                      className="text-zinc-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-zinc-800 transition-all shrink-0 cursor-pointer"
+                      title="Clear date inputs"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              )}
+
               <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
                 
                 {/* Platform selector */}
@@ -213,7 +344,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                   <button
                     type="button"
                     onClick={() => handleSort('date')}
-                    className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 flex-1 sm:flex-initial ${
+                    className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 flex-1 sm:flex-initial cursor-pointer ${
                       sortField === 'date' 
                         ? 'bg-emerald-950/60 border-emerald-800 text-emerald-400' 
                         : 'bg-zinc-900/40 border-zinc-800 text-zinc-400 hover:border-zinc-700'
@@ -224,7 +355,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                   <button
                     type="button"
                     onClick={() => handleSort('netProfit')}
-                    className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 flex-1 sm:flex-initial ${
+                    className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 flex-1 sm:flex-initial cursor-pointer ${
                       sortField === 'netProfit' 
                         ? 'bg-emerald-950/60 border-emerald-800 text-emerald-400' 
                         : 'bg-zinc-900/40 border-zinc-800 text-zinc-400 hover:border-zinc-700'
@@ -235,7 +366,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                   <button
                     type="button"
                     onClick={() => handleSort('hourlyWage')}
-                    className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 flex-1 sm:flex-initial ${
+                    className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 flex-1 sm:flex-initial cursor-pointer ${
                       sortField === 'hourlyWage' 
                         ? 'bg-emerald-950/60 border-emerald-800 text-emerald-400' 
                         : 'bg-zinc-900/40 border-zinc-800 text-zinc-400 hover:border-zinc-700'
@@ -300,7 +431,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
               </div>
               <h3 className="font-display font-semibold text-zinc-300 mt-4 text-base">No Matching Driving Shifts</h3>
               <p className="text-xs text-zinc-500 mt-2 max-w-sm mx-auto">
-                No shift entries matched your filters. Clear your search or add a new shift log on the Dashboard.
+                No shift entries matched your selected timeframe or filters. Try adjusting your timeframe preset or clear filters.
               </p>
             </motion.div>
           ) : (
@@ -312,13 +443,16 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
               const adPreset = (Math.floor(index / 2) + 1) % 4;
               
               return (
-                <React.Fragment key={log.id}>
-                  <motion.div
-                    layout
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
-                    transition={{ duration: 0.2 }}
+                <motion.div
+                  key={log.id}
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-4"
+                >
+                  <div
                     className={`bg-zinc-950 border rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer ${
                       isExpanded 
                         ? 'border-emerald-500/40 ring-1 ring-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.03)] bg-zinc-900/10' 
@@ -349,21 +483,34 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                               {log.date}
                             </span>
                           </div>
-                          {log.notes ? (
+                          {log.notes && log.notes.trim() ? (
                             <p className="text-sm text-zinc-400 line-clamp-1 mt-0.5 max-w-md">
                               {log.notes}
                             </p>
-                          ) : (
-                            <p className="text-sm text-zinc-400 mt-0.5">
-                              Logged with {log.expensesList.length} external expense item(s)
+                          ) : log.loggedExpenses > 0 ? (
+                            <p className="text-sm text-zinc-400 mt-0.5 font-mono font-medium">
+                              +{formatCurrency(log.loggedExpenses, profile)} Extra Expenses
                             </p>
-                          )}
+                          ) : null}
                         </div>
                       </div>
 
-                      {/* Mobile Chevron */}
-                      <div className="md:hidden text-zinc-400 bg-zinc-900/50 p-1.5 rounded-lg border border-zinc-800 shrink-0">
-                        <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-emerald-400' : ''}`} />
+                      {/* Mobile Chevron + Quick Edit */}
+                      <div className="flex items-center gap-1.5 md:hidden shrink-0">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingLog(log);
+                          }}
+                          className="text-emerald-400 hover:text-emerald-300 bg-emerald-950/40 p-1.5 rounded-lg border border-emerald-800/50"
+                          title="Edit shift"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <div className="text-zinc-400 bg-zinc-900/50 p-1.5 rounded-lg border border-zinc-800">
+                          <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-emerald-400' : ''}`} />
+                        </div>
                       </div>
                     </div>
 
@@ -392,6 +539,18 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
 
                       {/* Expand Chevron / Indicators */}
                       <div className="hidden md:flex items-center gap-2 pl-4 border-l border-zinc-900/60">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingLog(log);
+                          }}
+                          className="p-1.5 rounded-lg border border-emerald-800/60 bg-emerald-950/40 text-emerald-400 hover:bg-emerald-900/60 transition-all cursor-pointer mr-1"
+                          title="Quick Edit Shift"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+
                         <span className="text-sm text-zinc-300 font-sans font-semibold transition-colors hover:text-zinc-100">
                           {isExpanded ? 'Collapse' : 'Details'}
                         </span>
@@ -438,7 +597,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                                   <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
                                     <div 
                                       className="bg-amber-500 h-1.5 rounded-full" 
-                                      style={{ width: `${(log.fuelCost / log.grossRevenue) * 100}%` }}
+                                      style={{ width: `${log.grossRevenue > 0 ? (log.fuelCost / log.grossRevenue) * 100 : 0}%` }}
                                     ></div>
                                   </div>
                                 </div>
@@ -455,7 +614,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                                   <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
                                     <div 
                                       className="bg-orange-500 h-1.5 rounded-full" 
-                                      style={{ width: `${(log.depreciationCost / log.grossRevenue) * 100}%` }}
+                                      style={{ width: `${log.grossRevenue > 0 ? (log.depreciationCost / log.grossRevenue) * 100 : 0}%` }}
                                     ></div>
                                   </div>
                                 </div>
@@ -472,7 +631,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                                   <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
                                     <div 
                                       className="bg-rose-500 h-1.5 rounded-full" 
-                                      style={{ width: `${(log.loggedExpenses / log.grossRevenue) * 100}%` }}
+                                      style={{ width: `${log.grossRevenue > 0 ? (log.loggedExpenses / log.grossRevenue) * 100 : 0}%` }}
                                     ></div>
                                   </div>
                                 </div>
@@ -514,7 +673,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                                 </div>
 
                                 {/* Attached expenses details list */}
-                                {log.expensesList.length > 0 && (
+                                {log.expensesList && log.expensesList.length > 0 && (
                                   <div className="pt-2">
                                     <p className="text-xs text-zinc-400 font-bold uppercase tracking-wider mb-1">Receipt Log:</p>
                                     <div className="space-y-1">
@@ -530,15 +689,25 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                               </div>
 
                               {/* Actions */}
-                              <div className="pt-5 flex gap-2">
+                              <div className="pt-5 flex items-center gap-2.5">
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingLog(log)}
+                                  className="flex-1 bg-emerald-950/40 hover:bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 hover:border-emerald-600 py-2.5 px-3 rounded-xl text-sm font-bold font-sans flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm active:scale-95"
+                                  id={`edit-shift-button-${log.id}`}
+                                >
+                                  <Edit3 className="w-4 h-4" />
+                                  Edit Shift
+                                </button>
+
                                 <button
                                   type="button"
                                   onClick={() => onDeleteLog(log.id)}
-                                  className="w-full bg-rose-950/20 hover:bg-rose-950/50 text-rose-400 border border-rose-900/50 hover:border-rose-900 py-2.5 px-3 rounded-xl text-sm font-bold font-sans flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                                  className="flex-1 bg-rose-950/20 hover:bg-rose-950/50 text-rose-400 border border-rose-900/50 hover:border-rose-900 py-2.5 px-3 rounded-xl text-sm font-bold font-sans flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95"
                                   id={`delete-shift-button-${log.id}`}
                                 >
                                   <Trash2 className="w-4 h-4" />
-                                  Delete Log Entry
+                                  Delete
                                 </button>
                               </div>
 
@@ -551,7 +720,7 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                     )}
                   </AnimatePresence>
 
-                  </motion.div>
+                  </div>
 
                   {/* In-Feed Native Ad Placement (inserted after 1st shift and periodically) */}
                   {showInFeedAd && (
@@ -567,12 +736,26 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
                       <AdSlot presetIndex={adPreset} compact={true} />
                     </motion.div>
                   )}
-                </React.Fragment>
+                </motion.div>
               );
             })
           )}
         </AnimatePresence>
       </div>
+
+      {/* Edit Shift Modal */}
+      <EditShiftModal
+        log={editingLog}
+        profile={profile}
+        isOpen={!!editingLog}
+        onClose={() => setEditingLog(null)}
+        onSave={(updatedLog) => {
+          if (onUpdateLog) {
+            onUpdateLog(updatedLog);
+          }
+          setEditingLog(null);
+        }}
+      />
 
       {/* Global Footer Placement: bottom ad slot container at the very end of this tab view */}
       <AdSlot presetIndex={1} className="mt-8" />
@@ -580,3 +763,4 @@ export default function History({ logs, onDeleteLog, distanceUnit, profile }: Hi
     </div>
   );
 }
+
