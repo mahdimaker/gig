@@ -20,11 +20,25 @@
   --color-zinc-950: #1e2633;
 }
 
-/* Base custom styles to ensure Dim Slate appearance */
+/* Base custom styles to ensure Dim Slate appearance and native app feel */
 html, body {
   background-color: #131a26;
   color: #f1f5f9;
   font-family: var(--font-sans);
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+}
+
+/* Disable tap highlight box globally for native touch feel */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent accidental text selection & context menus on UI controls */
+button, nav, header, [role="button"], a, select, input[type="button"], input[type="submit"], .no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 /* Custom scrollbar for slate theme */

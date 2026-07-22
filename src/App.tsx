@@ -197,8 +197,8 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#131a26] text-zinc-100 flex flex-col antialiased selection:bg-emerald-500/30 selection:text-emerald-100" id="cartools-app-root">
       
-      {/* Night Vision Anti-Glare Header strip */}
-      <header className="bg-zinc-950/60 border-b border-zinc-900 sticky top-0 z-40 backdrop-blur-md">
+      {/* Main Header strip - Non-sticky so it scrolls naturally */}
+      <header className="bg-zinc-950/60 border-b border-zinc-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-start gap-3">
           
           <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-black p-2 rounded-xl shadow-lg shadow-emerald-950/20">
@@ -213,69 +213,71 @@ export default function App() {
       </header>
 
       {/* Main Content Layout container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-2 sm:pb-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-2 sm:pt-4 pb-2 sm:pb-6">
         
-        {/* Navigation Tabs (Big, tactical, high-contrast, finger-friendly) */}
-        <nav className="grid grid-cols-4 gap-2 mb-8 bg-zinc-950 border border-zinc-900 p-1.5 rounded-2xl" id="navigation-bar">
-          
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`py-3 rounded-xl font-semibold text-sm sm:text-base flex flex-col sm:flex-row items-center justify-center gap-2 transition-all duration-200 ${
-              activeTab === 'dashboard'
-                ? 'bg-zinc-900 border border-zinc-800 text-emerald-400 font-bold shadow'
-                : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/40'
-            }`}
-            id="tab-dashboard"
-          >
-            <LayoutDashboard className="w-4 h-4" />
-            <span>Dashboard</span>
-          </button>
+        {/* Floating Sticky Navigation Pill Container */}
+        <div className="sticky top-2 z-30 mb-5 transition-all" id="sticky-navigation-wrapper">
+          <nav className="grid grid-cols-4 gap-1.5 sm:gap-2 bg-zinc-950/90 border border-zinc-800/90 p-1 sm:p-1.5 rounded-2xl max-w-7xl mx-auto backdrop-blur-xl shadow-xl shadow-black/50 ring-1 ring-white/5" id="navigation-bar">
+            
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 ${
+                activeTab === 'dashboard'
+                  ? 'bg-zinc-900 border border-zinc-700/80 text-emerald-400 font-bold shadow-md shadow-black/20'
+                  : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/50'
+              }`}
+              id="tab-dashboard"
+            >
+              <LayoutDashboard className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>Dashboard</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('history')}
-            className={`py-3 rounded-xl font-semibold text-sm sm:text-base flex flex-col sm:flex-row items-center justify-center gap-2 transition-all duration-200 ${
-              activeTab === 'history'
-                ? 'bg-zinc-900 border border-zinc-800 text-emerald-400 font-bold shadow'
-                : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/40'
-            }`}
-            id="tab-history"
-          >
-            <HistoryIcon className="w-4 h-4" />
-            <span>Shift Logs</span>
-            {logs.length > 0 && (
-              <span className="hidden sm:inline-block text-xs bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded-full font-mono">
-                {logs.length}
-              </span>
-            )}
-          </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 ${
+                activeTab === 'history'
+                  ? 'bg-zinc-900 border border-zinc-700/80 text-emerald-400 font-bold shadow-md shadow-black/20'
+                  : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/50'
+              }`}
+              id="tab-history"
+            >
+              <HistoryIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>Shift Logs</span>
+              {logs.length > 0 && (
+                <span className="hidden sm:inline-block text-[10px] sm:text-xs bg-zinc-800/80 text-zinc-400 px-1.5 py-0.5 rounded-full font-mono">
+                  {logs.length}
+                </span>
+              )}
+            </button>
 
-          <button
-            onClick={() => setActiveTab('stats')}
-            className={`py-3 rounded-xl font-semibold text-sm sm:text-base flex flex-col sm:flex-row items-center justify-center gap-2 transition-all duration-200 ${
-              activeTab === 'stats'
-                ? 'bg-zinc-900 border border-zinc-800 text-emerald-400 font-bold shadow'
-                : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/40'
-            }`}
-            id="tab-stats"
-          >
-            <TrendingUp className="w-4 h-4" />
-            <span>Analytics</span>
-          </button>
+            <button
+              onClick={() => setActiveTab('stats')}
+              className={`py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 ${
+                activeTab === 'stats'
+                  ? 'bg-zinc-900 border border-zinc-700/80 text-emerald-400 font-bold shadow-md shadow-black/20'
+                  : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/50'
+              }`}
+              id="tab-stats"
+            >
+              <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>Analytics</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('settings')}
-            className={`py-3 rounded-xl font-semibold text-sm sm:text-base flex flex-col sm:flex-row items-center justify-center gap-2 transition-all duration-200 ${
-              activeTab === 'settings'
-                ? 'bg-zinc-900 border border-zinc-800 text-emerald-400 font-bold shadow'
-                : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/40'
-            }`}
-            id="tab-settings"
-          >
-            <Settings className="w-4 h-4" />
-            <span>Calibration</span>
-          </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 ${
+                activeTab === 'settings'
+                  ? 'bg-zinc-900 border border-zinc-700/80 text-emerald-400 font-bold shadow-md shadow-black/20'
+                  : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-zinc-900/50'
+              }`}
+              id="tab-settings"
+            >
+              <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>Calibration</span>
+            </button>
 
-        </nav>
+          </nav>
+        </div>
 
         {/* Tab Routing Container with animations */}
         <div id="tab-content-container">

@@ -457,7 +457,7 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
               {/* Core Metrics Group (Gross Income, Distance, Hours Online) - Single Column, High Density */}
               <div className="grid grid-cols-1 gap-4">
                 
-                {/* 1. Gross Revenue with Dedicated Row for Touch-Friendly Quick Add buttons */}
+                {/* 1. Gross Revenue */}
                 <div 
                   onClick={() => setSliderModalType('income')}
                   className="bg-zinc-900/40 border border-zinc-900/90 hover:border-emerald-500/50 py-4 px-4.5 rounded-xl relative transition-all cursor-pointer group select-none"
@@ -483,20 +483,6 @@ export default function Dashboard({ profile, onLogShift, onNavigateToSettings, o
                       value={grossRevenueInput}
                       className="w-full bg-transparent border-none text-zinc-100 text-3xl font-black font-mono focus:outline-none cursor-pointer py-2.5"
                     />
-                  </div>
-
-                  {/* Quick Add Buttons on a dedicated row beneath the large value input */}
-                  <div className="flex gap-2.5 mt-2 pt-1 border-t border-zinc-900/40" onClick={(e) => e.stopPropagation()}>
-                    {[5, 10, 20].map((amt) => (
-                      <button
-                        type="button"
-                        key={amt}
-                        onClick={() => handleAddGross(amt)}
-                        className="flex-1 text-center text-sm font-mono font-bold bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-750 text-emerald-400 hover:text-emerald-300 py-2.5 px-3 rounded-lg border border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer active:scale-95 select-none"
-                      >
-                        +{profile.measurementSystem === 'uk' ? '£' : profile.measurementSystem === 'metric' ? '€' : '$'}{amt}
-                      </button>
-                    ))}
                   </div>
                 </div>
 
